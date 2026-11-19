@@ -61,6 +61,9 @@ var _mushroom: MeshInstance3D
 var _prop_shader: Shader = preload("res://shaders/character.gdshader")
 var hand_r_world := Vector3.ZERO
 var board_node: MeshInstance3D
+## Joint positions/orientations from the last pose, in this node's local space.
+## CustomRider uses them to drive a realistic MakeHuman skeleton.
+var joints := {}
 
 
 func _ready() -> void:
@@ -199,6 +202,11 @@ func _apply_pose() -> void:
 	_box("pack", pelvis + P * Vector3(0, 0.32, -0.17), P, Vector3(0.3, 0.34, 0.1))
 	var HB := P * Basis.from_euler(Vector3(deg_to_rad(p.head_pitch), deg_to_rad(p.head_yaw), 0))
 	var head := pelvis + P * Vector3(0, 0.72, 0.01)
+	joints.root = root
+	joints.pelvis = pelvis
+	joints.P = P
+	joints.head = head
+	joints.HB = HB
 	_place("head", head, HB.scaled(Vector3.ONE * 0.12))
 	_place("helmet", head + HB * Vector3(0, 0.02, -0.005), HB.scaled(Vector3(0.145, 0.15, 0.145)))
 	_box("goggles", head + HB * Vector3(0, 0.03, 0.1), HB, Vector3(0.2, 0.07, 0.05))
@@ -209,6 +217,10 @@ func _apply_pose() -> void:
 		var el := sh + R * Vector3(0, -0.3, 0)
 		var R2 := R * Basis(Vector3.RIGHT, deg_to_rad(-side[4]))
 		var hand := el + R2 * Vector3(0, -0.27, 0)
+		joints["sh_" + side[0]] = sh
+		joints["el_" + side[0]] = el
+		joints["hand_" + side[0]] = hand
+		joints["handB_" + side[0]] = R2
 		_seg("uarm_" + side[0], sh, el, 0.062)
 		_seg("farm_" + side[0], el, hand, 0.055)
 		_box("glove_" + side[0], hand + R2 * Vector3(0, -0.04, 0), R2, Vector3(0.09, 0.11, 0.08))
@@ -222,6 +234,10 @@ func _apply_pose() -> void:
 		var ankle: Vector3 = root * Vector3(0.26 * side[1], 0.13, 0)
 		var pole: Vector3 = root * Vector3(0.3 * side[1], p.pole_up, 1.0).normalized()
 		var knee := _ik(hip, ankle, pole)
+		joints["hip_" + side[0]] = hip
+		joints["knee_" + side[0]] = knee
+		joints["ankle_" + side[0]] = ankle
+		joints["pole_" + side[0]] = pole
 		_seg("thigh_" + side[0], hip, knee, 0.085)
 		_seg("shin_" + side[0], knee, ankle, 0.072)
 		_box("boot_" + side[0], root * Vector3(0.26 * side[1], 0.09, 0.02), root, Vector3(0.14, 0.13, 0.3))

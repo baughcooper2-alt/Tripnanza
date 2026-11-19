@@ -6,10 +6,11 @@ extends CanvasLayer
 signal start_pressed
 signal ride_again_pressed
 signal menu_pressed
+signal customize_pressed
 signal resume_pressed
 
 ## Shown bottom-right on the summit menu so you can tell which version is running.
-const BUILD := "0.6 · physics upgrade, flips need big air"
+const BUILD := "0.7 · rider customization"
 const WHITE := Color(1, 1, 1)
 const INK := Color(0.08, 0.1, 0.2)
 const ORANGE := Color(1.0, 0.42, 0.12)
@@ -147,6 +148,9 @@ func _build_menu() -> void:
 	start_button = _button("START RUN", true)
 	start_button.pressed.connect(func(): start_pressed.emit())
 	col.add_child(start_button)
+	var cb := _button("CUSTOMIZE RIDER")
+	cb.pressed.connect(func(): customize_pressed.emit())
+	col.add_child(cb)
 	var sb := _button("SETTINGS")
 	sb.pressed.connect(func(): _show_settings(true))
 	col.add_child(sb)
@@ -244,6 +248,8 @@ func _build_settings() -> void:
 	rb.add_theme_font_size_override("font_size", 18)
 	rb.toggled.connect(Settings.set_rumble)
 	v.add_child(rb)
+	var cr := _label("Credits: characters made with MakeHuman (CC0) incl. assets by EWS, Elvaerwyn,\nMindfront, janexx, punkduck (CC-BY) · snowboarder model by onirix (CC-BY)", 12, Color(1, 1, 1, 0.75), 0)
+	v.add_child(cr)
 	var back := _button("BACK")
 	back.pressed.connect(func(): _show_settings(false))
 	v.add_child(back)

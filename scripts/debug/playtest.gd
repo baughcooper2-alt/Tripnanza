@@ -72,6 +72,8 @@ func _process(dt: float) -> void:
 			_first_minute()
 		"long_run":
 			_long_run()
+		"customize":
+			_customize_test()
 		"summit":
 			if t > 2.0:
 				_shot_once("summit_menu")
@@ -280,3 +282,70 @@ func _avoid_inner(gain: float, target = null) -> void:
 			best_dir = dir
 	_steer_dir(best_dir, 3.0 * gain)
 	_ai.forward = best_score > 30.0
+
+
+# --------------------------------------------------------------- customize
+
+func _customize_test() -> void:
+	match phase:
+		"menu":
+			if t > 1.5:
+				main.open_customize()
+				_set_phase("cust1")
+		"cust1":
+			if _phase_t > 2.0:
+				_shot_once("c1_default")
+			if _phase_t > 2.5:
+				var m: CustomRider = rider.model
+				var l: Dictionary = m.look.duplicate(true)
+				var it: Dictionary = CustomRider.load_catalog().items[l.gender]
+				l.top = it.top[-1].id
+				l.top_color = [0.1, 0.35, 0.9]
+				l.hair = it.hair[-1].id
+				l.hat = ""
+				l.eyewear = "proc_goggles_mirror"
+				l.eyewear_color = [0.2, 0.8, 1.0]
+				l.board_pattern = 6
+				l.morphs = {nose_size = 0.8, jaw_width = 0.7, cheekbones = 0.8}
+				m.apply_look(l)
+				_set_phase("cust2")
+		"cust2":
+			if _phase_t > 2.0:
+				_shot_once("c2_changed")
+			if _phase_t > 2.5:
+				var m: CustomRider = rider.model
+				var l: Dictionary = m.look.duplicate(true)
+				var cat := CustomRider.load_catalog()
+				l.gender = "female"
+				for slot in ["hair", "top", "bottom", "shoes", "gloves"]:
+					l[slot] = cat.items.female[slot][0].id
+				l.top_color = [0.95, 0.3, 0.6]
+				l.skin = 1
+				l.hat = "proc_beanie_pom"
+				m.apply_look(l)
+				_set_phase("cust3")
+		"cust3":
+			if _phase_t > 2.0:
+				_shot_once("c3_female")
+			if _phase_t > 2.5:
+				main._customize._finish()
+				_set_phase("back")
+		"back":
+			if _phase_t > 1.5:
+				_shot_once("c4_summit")
+			if _phase_t > 2.5:
+				rider.ai = _ai
+				main.start_run()
+				_set_phase("ride")
+		"ride":
+			_steer_to(Vector2(0.0, 72.0), 4.0)
+			_ai.jump = rider.position.z > 66.0 and rider.position.z < 72.9
+			if _phase_t > 3.2:
+				_shot_once("c5_intro")
+			if _phase_t > 7.0:
+				_shot_once("c6_riding")
+			if rider.state == Rider.State.AIR:
+				_ai.back = absf(rider.flip) < deg_to_rad(265.0)
+				_shot_once("c7_air", 0.4)
+			if _phase_t > 12.0:
+				_finish()

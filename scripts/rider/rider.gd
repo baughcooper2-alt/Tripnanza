@@ -9,7 +9,7 @@ signal trick_changed(text: String)
 signal landed(result: Dictionary)
 signal crashed(reason: String)
 
-enum State { SEATED, INTRO, RIDING, AIR, CRASHED }
+enum State { SEATED, INTRO, RIDING, AIR, CRASHED, SHOWCASE }
 
 @export_group("Handling")
 @export var gravity := 11.0                 ## closer to real 9.81 than before, still snappy
@@ -122,10 +122,15 @@ var skid := 0.0                 ## 0 = clean carve, 1 = full skid (sound, spray)
 var _was_grabbing := false
 
 
-@export var use_imported_rider := true   ## false = the original procedural rider
+## custom = your customizable realistic rider (needs the generated character
+## assets), imported = the Onirix snowboarder, procedural = the original blocky rider.
+@export_enum("custom", "imported", "procedural") var rider_type := "custom"
+@export var use_imported_rider := true   ## legacy switch (used when rider_type is "imported")
 
 func _ready() -> void:
-	if use_imported_rider and ResourceLoader.exists(RiderAvatar.GLB):
+	if rider_type == "custom" and CustomRider.available():
+		model = CustomRider.new()
+	elif rider_type != "procedural" and use_imported_rider and ResourceLoader.exists(RiderAvatar.GLB):
 		model = RiderAvatar.new()
 	else:
 		model = RiderModel.new()
@@ -165,6 +170,15 @@ func reset_to_summit() -> void:
 	model.snap()
 	_vis_q = _ground_basis().get_rotation_quaternion()
 	transform.basis = Basis(_vis_q)
+
+
+## Stand on the summit for the customization turntable.
+func set_showcase(on: bool) -> void:
+	if on:
+		state = State.SHOWCASE
+		fwd = Vector3(0, 0, 1)
+	else:
+		reset_to_summit()
 
 
 func begin_intro() -> void:
@@ -235,6 +249,12 @@ func bail() -> void:
 
 func _physics_process(dt: float) -> void:
 	match state:
+		State.SHOWCASE:
+			_set_weights({})
+			model.breathe = 1.0
+			var spin_in := (1.0 if Input.is_action_pressed("grab_right") or Input.is_key_pressed(KEY_E) or Input.is_joy_button_pressed(0, JOY_BUTTON_RIGHT_SHOULDER) else 0.0) \
+				- (1.0 if Input.is_action_pressed("grab_left") or Input.is_key_pressed(KEY_Q) or Input.is_joy_button_pressed(0, JOY_BUTTON_LEFT_SHOULDER) else 0.0)
+			fwd = fwd.rotated(Vector3.UP, (spin_in * 2.0 + 0.25) * dt)
 		State.SEATED:
 			_set_weights({sit = 1.0})
 		State.INTRO:

@@ -3,7 +3,7 @@ extends Node3D
 ## one continuous shot) -> RIDING -> WIPEOUT -> Ride Again -> INTRO ...
 ## Each system lives on its own node; this script only wires them together.
 
-enum Flow { SUMMIT, INTRO, RIDING, WIPEOUT }
+enum Flow { SUMMIT, INTRO, RIDING, WIPEOUT, CUSTOMIZE }
 
 @export var wipeout_card_delay := 1.1
 @export var wind_powder_rate := 26.0
@@ -68,6 +68,7 @@ func _ready() -> void:
 	score.trick_banked.connect(func(_n, _p, q): Audio.play("trick_clean" if q == "clean" else "trick_sketchy", 0.7))
 	trip.phase_changed.connect(func(p): if p != "Sober" and flow == Flow.RIDING: Audio.play("phase", 0.6))
 	ui.start_pressed.connect(start_run)
+	ui.customize_pressed.connect(open_customize)
 	ui.ride_again_pressed.connect(ride_again)
 	ui.menu_pressed.connect(to_summit_menu)
 	ui.resume_pressed.connect(func(): _set_paused(false))
@@ -99,6 +100,36 @@ func _reset_world() -> void:
 	flow = Flow.SUMMIT
 	_crash_timer = -1.0
 	Audio.set_muffled(false)
+
+
+var _customize: CustomizeMenu
+
+## Summit -> customization turntable (only with the customizable rider).
+func open_customize() -> void:
+	if flow != Flow.SUMMIT:
+		return
+	if not (rider.model is CustomRider):
+		ui.toast("Custom riders need the generated character assets")
+		return
+	flow = Flow.CUSTOMIZE
+	ui.hide_menu()
+	rider.set_showcase(true)
+	cam.showcase = true
+	if _customize == null:
+		_customize = CustomizeMenu.new()
+		ui.add_child(_customize)
+		_customize.setup(rider.model, ui.font)
+		_customize.done.connect(close_customize)
+	_customize.open()
+
+
+func close_customize() -> void:
+	_customize.visible = false
+	cam.showcase = false
+	rider.set_showcase(false)
+	cam.set_menu_mode()
+	flow = Flow.SUMMIT
+	ui.show_menu()
 
 
 func start_run() -> void:

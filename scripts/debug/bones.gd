@@ -1,12 +1,10 @@
 extends Node
 func _ready():
-	var scene: Node3D = load("res://assets/characters/snowboarder/snowboarder.glb").instantiate()
-	add_child(scene)
-	var sk: Skeleton3D = scene.find_children("*", "Skeleton3D", true, false)[0]
-	print("skeleton path ", scene.get_path_to(sk), " xf ", sk.global_transform)
-	for n in scene.find_children("*", "", true, false):
-		print("node ", scene.get_path_to(n), " ", n.get_class())
-	for i in sk.get_bone_count():
-		var r := sk.get_bone_rest(i)
-		print(i, " ", sk.get_bone_name(i), " parent=", sk.get_bone_parent(i), " rest_origin=", r.origin, " global=", sk.get_bone_global_rest(i).origin)
+	for f in ["res://assets/characters/human/male/top_elvs_hooded_sweat_jacket1.glb", "res://assets/characters/human/male/hair_short02.glb", "res://assets/characters/human/male/body.glb"]:
+		var sc: Node = load(f).instantiate()
+		for mi in sc.find_children("*", "MeshInstance3D", true, false):
+			for si in mi.mesh.get_surface_count():
+				var m = mi.get_active_material(si)
+				var mm = mi.mesh.surface_get_material(si)
+				print(f.get_file(), " ", mi.name, " s", si, " active=", m, " mesh_mat=", mm, " tex=", (m.albedo_texture if m is BaseMaterial3D else "n/a"), " transp=", (m.transparency if m is BaseMaterial3D else ""))
 	get_tree().quit()

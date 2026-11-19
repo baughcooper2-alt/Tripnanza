@@ -13,6 +13,8 @@ var fullscreen := false
 var music_volume := 0.8
 var sfx_volume := 0.75
 var rumble := true
+## The player's rider customization (see CustomRider.default_look for keys).
+var look := {}
 var best_score := 0
 var best_distance := 0.0
 var best_trick := ""
@@ -88,6 +90,7 @@ func load_settings() -> void:
 	music_volume = c.get_value("settings", "music_volume", music_volume)
 	sfx_volume = c.get_value("settings", "sfx_volume", sfx_volume)
 	rumble = c.get_value("settings", "rumble", rumble)
+	look = c.get_value("rider", "look", look)
 	best_score = c.get_value("best", "score", best_score)
 	best_distance = c.get_value("best", "distance", best_distance)
 	best_trick = c.get_value("best", "trick", best_trick)
@@ -103,6 +106,7 @@ func save_settings() -> void:
 	c.set_value("settings", "music_volume", music_volume)
 	c.set_value("settings", "sfx_volume", sfx_volume)
 	c.set_value("settings", "rumble", rumble)
+	c.set_value("rider", "look", look)
 	c.set_value("best", "score", best_score)
 	c.set_value("best", "distance", best_distance)
 	c.set_value("best", "trick", best_trick)

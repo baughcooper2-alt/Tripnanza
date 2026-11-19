@@ -20,7 +20,7 @@ func _ready() -> void:
 	add_child(sun)
 	var view: String = Settings.args.get("view", "side")
 	for i in POSES.size():
-		var m = RiderAvatar.new() if Settings.args.has("avatar") else RiderModel.new()
+		var m = CustomRider.new() if Settings.args.has("custom") else (RiderAvatar.new() if Settings.args.has("avatar") else RiderModel.new())
 		add_child(m)
 		m.position = Vector3((i % 7) * 2.4, (i / 7) * -2.6, 0)
 		m.rotation.y = PI * 0.5 if view == "back" else 0.0

@@ -1,0 +1,1450 @@
+{
+ "bodies": {
+  "male": {
+   "body": "male/body.glb",
+   "skins": [
+    {
+     "id": "young_caucasian_male",
+     "name": "Young caucasian male",
+     "albedo": "skins/young_caucasian_male.jpg"
+    },
+    {
+     "id": "young_caucasian_male2",
+     "name": "Young caucasian male2",
+     "albedo": "skins/young_caucasian_male2.jpg"
+    },
+    {
+     "id": "young_african_male",
+     "name": "Young african male",
+     "albedo": "skins/young_african_male.jpg"
+    },
+    {
+     "id": "young_asian_male",
+     "name": "Young asian male",
+     "albedo": "skins/young_asian_male.jpg"
+    },
+    {
+     "id": "middleage_caucasian_male",
+     "name": "Middleage caucasian male",
+     "albedo": "skins/middleage_caucasian_male.jpg"
+    },
+    {
+     "id": "middleage_african_male",
+     "name": "Middleage african male",
+     "albedo": "skins/middleage_african_male.jpg"
+    },
+    {
+     "id": "middleage_asian_male",
+     "name": "Middleage asian male",
+     "albedo": "skins/middleage_asian_male.jpg"
+    }
+   ],
+   "morphs": [
+    {
+     "id": "fullness",
+     "name": "Face fullness"
+    },
+    {
+     "id": "head_width",
+     "name": "Head width"
+    },
+    {
+     "id": "jaw_width",
+     "name": "Jaw width"
+    },
+    {
+     "id": "chin",
+     "name": "Chin"
+    },
+    {
+     "id": "cheekbones",
+     "name": "Cheekbones"
+    },
+    {
+     "id": "nose_size",
+     "name": "Nose size"
+    },
+    {
+     "id": "nose_width",
+     "name": "Nose width"
+    },
+    {
+     "id": "nose_bridge",
+     "name": "Nose bridge"
+    },
+    {
+     "id": "mouth_width",
+     "name": "Mouth width"
+    },
+    {
+     "id": "lips",
+     "name": "Lip fullness"
+    },
+    {
+     "id": "eye_size",
+     "name": "Eye size"
+    },
+    {
+     "id": "ears",
+     "name": "Ear size"
+    },
+    {
+     "id": "brows",
+     "name": "Brow height"
+    }
+   ]
+  },
+  "female": {
+   "body": "female/body.glb",
+   "skins": [
+    {
+     "id": "young_caucasian_female",
+     "name": "Young caucasian female",
+     "albedo": "skins/young_caucasian_female.jpg"
+    },
+    {
+     "id": "young_caucasian_female2",
+     "name": "Young caucasian female2",
+     "albedo": "skins/young_caucasian_female2.jpg"
+    },
+    {
+     "id": "young_african_female",
+     "name": "Young african female",
+     "albedo": "skins/young_african_female.jpg"
+    },
+    {
+     "id": "young_asian_female",
+     "name": "Young asian female",
+     "albedo": "skins/young_asian_female.jpg"
+    },
+    {
+     "id": "onlytheghosts_young_eurasian_female",
+     "name": "Onlytheghosts young eurasian female",
+     "albedo": "skins/onlytheghosts_young_eurasian_female.jpg"
+    },
+    {
+     "id": "toigo_light_skin_female_freckles",
+     "name": "Light skin female freckles",
+     "albedo": "skins/toigo_light_skin_female_freckles.jpg"
+    },
+    {
+     "id": "cutoff3d_indian_female_skin",
+     "name": "Cutoff3d indian female skin",
+     "albedo": "skins/cutoff3d_indian_female_skin.jpg"
+    },
+    {
+     "id": "darthfurby_caucasian_female",
+     "name": "Darthfurby caucasian female",
+     "albedo": "skins/darthfurby_caucasian_female.jpg"
+    },
+    {
+     "id": "middleage_african_female",
+     "name": "Middleage african female",
+     "albedo": "skins/middleage_african_female.jpg"
+    },
+    {
+     "id": "middleage_asian_female",
+     "name": "Middleage asian female",
+     "albedo": "skins/middleage_asian_female.jpg"
+    }
+   ],
+   "morphs": [
+    {
+     "id": "fullness",
+     "name": "Face fullness"
+    },
+    {
+     "id": "head_width",
+     "name": "Head width"
+    },
+    {
+     "id": "jaw_width",
+     "name": "Jaw width"
+    },
+    {
+     "id": "chin",
+     "name": "Chin"
+    },
+    {
+     "id": "cheekbones",
+     "name": "Cheekbones"
+    },
+    {
+     "id": "nose_size",
+     "name": "Nose size"
+    },
+    {
+     "id": "nose_width",
+     "name": "Nose width"
+    },
+    {
+     "id": "nose_bridge",
+     "name": "Nose bridge"
+    },
+    {
+     "id": "mouth_width",
+     "name": "Mouth width"
+    },
+    {
+     "id": "lips",
+     "name": "Lip fullness"
+    },
+    {
+     "id": "eye_size",
+     "name": "Eye size"
+    },
+    {
+     "id": "ears",
+     "name": "Ear size"
+    },
+    {
+     "id": "brows",
+     "name": "Brow height"
+    }
+   ]
+  }
+ },
+ "items": {
+  "male": {
+   "hair": [
+    {
+     "id": "short01",
+     "name": "Short01",
+     "file": "male/hair_short01.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "short02",
+     "name": "Short02",
+     "file": "male/hair_short02.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "short03",
+     "name": "Short03",
+     "file": "male/hair_short03.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "short04",
+     "name": "Short04",
+     "file": "male/hair_short04.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "cortu_short_messy_hair",
+     "name": "Short messy hair",
+     "file": "male/hair_cortu_short_messy_hair.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "elvs_short_side_do",
+     "name": "Short side do",
+     "file": "male/hair_elvs_short_side_do.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "elvs_maxwell_hair",
+     "name": "Maxwell hair",
+     "file": "male/hair_elvs_maxwell_hair.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "elvs_grump_hair",
+     "name": "Grump hair",
+     "file": "male/hair_elvs_grump_hair.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "elvs_keylth_hair",
+     "name": "Keylth hair",
+     "file": "male/hair_elvs_keylth_hair.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "afro01",
+     "name": "Afro01",
+     "file": "male/hair_afro01.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "elvs_micky_afro",
+     "name": "Micky afro",
+     "file": "male/hair_elvs_micky_afro.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "elvs_braided_rows",
+     "name": "Braided rows",
+     "file": "male/hair_elvs_braided_rows.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "culturalibre_hair_01",
+     "name": "Hair 01",
+     "file": "male/hair_culturalibre_hair_01.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "culturalibre_hair_05",
+     "name": "Hair 05",
+     "file": "male/hair_culturalibre_hair_05.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "bob01",
+     "name": "Bob01",
+     "file": "male/hair_bob01.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "bob02",
+     "name": "Bob02",
+     "file": "male/hair_bob02.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "toigo_blunt_bob_with_bangs",
+     "name": "Blunt bob with bangs",
+     "file": "male/hair_toigo_blunt_bob_with_bangs.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "elvs_wavy_bob",
+     "name": "Wavy bob",
+     "file": "male/hair_elvs_wavy_bob.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "long01",
+     "name": "Long01",
+     "file": "male/hair_long01.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "ponytail01",
+     "name": "Ponytail01",
+     "file": "male/hair_ponytail01.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "braid01",
+     "name": "Braid01",
+     "file": "male/hair_braid01.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "punkduck_alpha7_long",
+     "name": "Alpha7 long",
+     "file": "male/hair_punkduck_alpha7_long.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "elvs_lara_hair",
+     "name": "Lara hair",
+     "file": "male/hair_elvs_lara_hair.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "elvs_hazel_hair",
+     "name": "Hazel hair",
+     "file": "male/hair_elvs_hazel_hair.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "o4saken_curly01",
+     "name": "Curly01",
+     "file": "male/hair_o4saken_curly01.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "rehmanpolanski_hair_bun_brown",
+     "name": "Rehmanpolanski hair bun brown",
+     "file": "male/hair_rehmanpolanski_hair_bun_brown.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "cortu_shaggy_green_hair",
+     "name": "Shaggy green hair",
+     "file": "male/hair_cortu_shaggy_green_hair.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "cortu_strawberry_cloud_hair",
+     "name": "Strawberry cloud hair",
+     "file": "male/hair_cortu_strawberry_cloud_hair.glb",
+     "hides": [],
+     "alpha": true
+    }
+   ],
+   "top": [
+    {
+     "id": "elvs_hooded_sweat_jacket1",
+     "name": "Hooded sweat jacket1",
+     "file": "male/top_elvs_hooded_sweat_jacket1.glb",
+     "hides": [
+      "torso",
+      "arms"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "mindfront_lusekofta",
+     "name": "Lusekofta",
+     "file": "male/top_mindfront_lusekofta.glb",
+     "hides": [
+      "torso",
+      "arms"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "mindfront_knitted_sweater_01",
+     "name": "Knitted sweater 01",
+     "file": "male/top_mindfront_knitted_sweater_01.glb",
+     "hides": [
+      "torso",
+      "arms"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "mindfront_knitted_sweater_02",
+     "name": "Knitted sweater 02",
+     "file": "male/top_mindfront_knitted_sweater_02.glb",
+     "hides": [
+      "torso",
+      "arms"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "toigo_fisherman_sweater",
+     "name": "Fisherman sweater",
+     "file": "male/top_toigo_fisherman_sweater.glb",
+     "hides": [
+      "torso",
+      "arms"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "mindfront_cardigan_long_open_front",
+     "name": "Cardigan long open front",
+     "file": "male/top_mindfront_cardigan_long_open_front.glb",
+     "hides": [
+      "torso",
+      "arms"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "female_sportsuit01",
+     "name": "Female sportsuit01",
+     "file": "male/top_female_sportsuit01.glb",
+     "hides": [
+      "torso",
+      "legs"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "male_worksuit01",
+     "name": "Male worksuit01",
+     "file": "male/top_male_worksuit01.glb",
+     "hides": [
+      "torso",
+      "legs"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "male_casualsuit01",
+     "name": "Male casualsuit01",
+     "file": "male/top_male_casualsuit01.glb",
+     "hides": [
+      "torso",
+      "arms",
+      "legs"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "male_casualsuit03",
+     "name": "Male casualsuit03",
+     "file": "male/top_male_casualsuit03.glb",
+     "hides": [
+      "torso",
+      "arms",
+      "legs"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "male_casualsuit05",
+     "name": "Male casualsuit05",
+     "file": "male/top_male_casualsuit05.glb",
+     "hides": [
+      "torso",
+      "arms",
+      "legs"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "female_casualsuit01",
+     "name": "Female casualsuit01",
+     "file": "male/top_female_casualsuit01.glb",
+     "hides": [
+      "torso",
+      "legs"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "female_casualsuit02",
+     "name": "Female casualsuit02",
+     "file": "male/top_female_casualsuit02.glb",
+     "hides": [
+      "torso"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "elvs_crude_t-shirt_male",
+     "name": "Crude t shirt male",
+     "file": "male/top_elvs_crude_t-shirt_male.glb",
+     "hides": [
+      "torso"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "ews_striped_shirt",
+     "name": "Striped shirt",
+     "file": "male/top_ews_striped_shirt.glb",
+     "hides": [
+      "torso",
+      "arms"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "namuhekam_male_polo_shirt",
+     "name": "Namuhekam male polo shirt",
+     "file": "male/top_namuhekam_male_polo_shirt.glb",
+     "hides": [
+      "torso"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "janexx_old_female_sweater",
+     "name": "Janexx old female sweater",
+     "file": "male/top_janexx_old_female_sweater.glb",
+     "hides": [
+      "torso",
+      "arms"
+     ],
+     "alpha": true
+    }
+   ],
+   "bottom": [
+    {
+     "id": "cortu_cargo_pants",
+     "name": "Cargo pants",
+     "file": "male/bottom_cortu_cargo_pants.glb",
+     "hides": [
+      "legs"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "toigo_wool_pants",
+     "name": "Wool pants",
+     "file": "male/bottom_toigo_wool_pants.glb",
+     "hides": [
+      "legs"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "cortu_jeans_shorts",
+     "name": "Jeans shorts",
+     "file": "male/bottom_cortu_jeans_shorts.glb",
+     "hides": [],
+     "alpha": true
+    }
+   ],
+   "shoes": [
+    {
+     "id": "toigo_ankle_boots_male",
+     "name": "Ankle boots male",
+     "file": "male/shoes_toigo_ankle_boots_male.glb",
+     "hides": [
+      "feet"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "toigo_ankle_boots_female",
+     "name": "Ankle boots female",
+     "file": "male/shoes_toigo_ankle_boots_female.glb",
+     "hides": [
+      "feet"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "culturalibre_male_boots",
+     "name": "Male boots",
+     "file": "male/shoes_culturalibre_male_boots.glb",
+     "hides": [
+      "feet"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "culturalibre_hero_boots_1",
+     "name": "Hero boots 1",
+     "file": "male/shoes_culturalibre_hero_boots_1.glb",
+     "hides": [
+      "feet"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "culturalibre_heroine_boots_1",
+     "name": "Heroine boots 1",
+     "file": "male/shoes_culturalibre_heroine_boots_1.glb",
+     "hides": [
+      "legs",
+      "feet"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "shoes01",
+     "name": "Shoes01",
+     "file": "male/shoes_shoes01.glb",
+     "hides": [
+      "feet"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "shoes03",
+     "name": "Shoes03",
+     "file": "male/shoes_shoes03.glb",
+     "hides": [
+      "feet"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "shoes05",
+     "name": "Shoes05",
+     "file": "male/shoes_shoes05.glb",
+     "hides": [
+      "feet"
+     ],
+     "alpha": true
+    }
+   ],
+   "gloves": [
+    {
+     "id": "toigo_gloves_short",
+     "name": "Gloves short",
+     "file": "male/gloves_toigo_gloves_short.glb",
+     "hides": [
+      "hands"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "toigo_gloves_medium",
+     "name": "Gloves medium",
+     "file": "male/gloves_toigo_gloves_medium.glb",
+     "hides": [
+      "hands"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "culturalibre_hero-heroine_gloves_1",
+     "name": "Hero heroine gloves 1",
+     "file": "male/gloves_culturalibre_hero-heroine_gloves_1.glb",
+     "hides": [
+      "hands"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "culturalibre_hero-heroine_gloves_3",
+     "name": "Hero heroine gloves 3",
+     "file": "male/gloves_culturalibre_hero-heroine_gloves_3.glb",
+     "hides": [
+      "hands"
+     ],
+     "alpha": true
+    }
+   ],
+   "hat": [
+    {
+     "id": "culturalibre_motorcycle_helmet",
+     "name": "Motorcycle helmet",
+     "file": "male/hat_culturalibre_motorcycle_helmet.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "jujube_newsboy_cap",
+     "name": "Newsboy cap",
+     "file": "male/hat_jujube_newsboy_cap.glb",
+     "hides": [],
+     "alpha": false
+    },
+    {
+     "id": "fedora01",
+     "name": "Fedora01",
+     "file": "male/hat_fedora01.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "joepal_xmas_cap",
+     "name": "Xmas cap",
+     "file": "male/hat_joepal_xmas_cap.glb",
+     "hides": [],
+     "alpha": true
+    }
+   ],
+   "eyewear": [
+    {
+     "id": "kwnet_at_optical_glasses",
+     "name": "At optical glasses",
+     "file": "male/eyewear_kwnet_at_optical_glasses.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "spamrakuen_sagerfrogs_glasses_01",
+     "name": "Sagerfrogs glasses 01",
+     "file": "male/eyewear_spamrakuen_sagerfrogs_glasses_01.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "spamrakuen_sagerfrogs_glasses_03",
+     "name": "Sagerfrogs glasses 03",
+     "file": "male/eyewear_spamrakuen_sagerfrogs_glasses_03.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "toigo_round_glasses_leopard",
+     "name": "Round glasses leopard",
+     "file": "male/eyewear_toigo_round_glasses_leopard.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "frankyaye_glasses_library_male",
+     "name": "Glasses library male",
+     "file": "male/eyewear_frankyaye_glasses_library_male.glb",
+     "hides": [],
+     "alpha": true
+    }
+   ]
+  },
+  "female": {
+   "hair": [
+    {
+     "id": "short01",
+     "name": "Short01",
+     "file": "female/hair_short01.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "short02",
+     "name": "Short02",
+     "file": "female/hair_short02.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "short03",
+     "name": "Short03",
+     "file": "female/hair_short03.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "short04",
+     "name": "Short04",
+     "file": "female/hair_short04.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "cortu_short_messy_hair",
+     "name": "Short messy hair",
+     "file": "female/hair_cortu_short_messy_hair.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "elvs_short_side_do",
+     "name": "Short side do",
+     "file": "female/hair_elvs_short_side_do.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "elvs_maxwell_hair",
+     "name": "Maxwell hair",
+     "file": "female/hair_elvs_maxwell_hair.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "elvs_grump_hair",
+     "name": "Grump hair",
+     "file": "female/hair_elvs_grump_hair.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "elvs_keylth_hair",
+     "name": "Keylth hair",
+     "file": "female/hair_elvs_keylth_hair.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "afro01",
+     "name": "Afro01",
+     "file": "female/hair_afro01.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "elvs_micky_afro",
+     "name": "Micky afro",
+     "file": "female/hair_elvs_micky_afro.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "elvs_braided_rows",
+     "name": "Braided rows",
+     "file": "female/hair_elvs_braided_rows.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "culturalibre_hair_01",
+     "name": "Hair 01",
+     "file": "female/hair_culturalibre_hair_01.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "culturalibre_hair_05",
+     "name": "Hair 05",
+     "file": "female/hair_culturalibre_hair_05.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "bob01",
+     "name": "Bob01",
+     "file": "female/hair_bob01.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "bob02",
+     "name": "Bob02",
+     "file": "female/hair_bob02.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "toigo_blunt_bob_with_bangs",
+     "name": "Blunt bob with bangs",
+     "file": "female/hair_toigo_blunt_bob_with_bangs.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "elvs_wavy_bob",
+     "name": "Wavy bob",
+     "file": "female/hair_elvs_wavy_bob.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "long01",
+     "name": "Long01",
+     "file": "female/hair_long01.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "ponytail01",
+     "name": "Ponytail01",
+     "file": "female/hair_ponytail01.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "braid01",
+     "name": "Braid01",
+     "file": "female/hair_braid01.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "punkduck_alpha7_long",
+     "name": "Alpha7 long",
+     "file": "female/hair_punkduck_alpha7_long.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "elvs_lara_hair",
+     "name": "Lara hair",
+     "file": "female/hair_elvs_lara_hair.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "elvs_hazel_hair",
+     "name": "Hazel hair",
+     "file": "female/hair_elvs_hazel_hair.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "o4saken_curly01",
+     "name": "Curly01",
+     "file": "female/hair_o4saken_curly01.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "rehmanpolanski_hair_bun_brown",
+     "name": "Rehmanpolanski hair bun brown",
+     "file": "female/hair_rehmanpolanski_hair_bun_brown.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "cortu_shaggy_green_hair",
+     "name": "Shaggy green hair",
+     "file": "female/hair_cortu_shaggy_green_hair.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "cortu_strawberry_cloud_hair",
+     "name": "Strawberry cloud hair",
+     "file": "female/hair_cortu_strawberry_cloud_hair.glb",
+     "hides": [],
+     "alpha": true
+    }
+   ],
+   "top": [
+    {
+     "id": "elvs_hooded_sweat_jacket1",
+     "name": "Hooded sweat jacket1",
+     "file": "female/top_elvs_hooded_sweat_jacket1.glb",
+     "hides": [
+      "torso",
+      "arms"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "mindfront_lusekofta",
+     "name": "Lusekofta",
+     "file": "female/top_mindfront_lusekofta.glb",
+     "hides": [
+      "torso",
+      "arms"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "mindfront_knitted_sweater_01",
+     "name": "Knitted sweater 01",
+     "file": "female/top_mindfront_knitted_sweater_01.glb",
+     "hides": [
+      "torso",
+      "arms"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "mindfront_knitted_sweater_02",
+     "name": "Knitted sweater 02",
+     "file": "female/top_mindfront_knitted_sweater_02.glb",
+     "hides": [
+      "torso",
+      "arms"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "toigo_fisherman_sweater",
+     "name": "Fisherman sweater",
+     "file": "female/top_toigo_fisherman_sweater.glb",
+     "hides": [
+      "torso",
+      "arms"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "mindfront_cardigan_long_open_front",
+     "name": "Cardigan long open front",
+     "file": "female/top_mindfront_cardigan_long_open_front.glb",
+     "hides": [
+      "torso",
+      "arms"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "female_sportsuit01",
+     "name": "Female sportsuit01",
+     "file": "female/top_female_sportsuit01.glb",
+     "hides": [
+      "torso",
+      "legs"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "male_worksuit01",
+     "name": "Male worksuit01",
+     "file": "female/top_male_worksuit01.glb",
+     "hides": [
+      "torso",
+      "legs"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "male_casualsuit01",
+     "name": "Male casualsuit01",
+     "file": "female/top_male_casualsuit01.glb",
+     "hides": [
+      "torso",
+      "arms",
+      "legs"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "male_casualsuit03",
+     "name": "Male casualsuit03",
+     "file": "female/top_male_casualsuit03.glb",
+     "hides": [
+      "torso",
+      "arms",
+      "legs"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "male_casualsuit05",
+     "name": "Male casualsuit05",
+     "file": "female/top_male_casualsuit05.glb",
+     "hides": [
+      "torso",
+      "arms",
+      "legs"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "female_casualsuit01",
+     "name": "Female casualsuit01",
+     "file": "female/top_female_casualsuit01.glb",
+     "hides": [
+      "torso",
+      "legs"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "female_casualsuit02",
+     "name": "Female casualsuit02",
+     "file": "female/top_female_casualsuit02.glb",
+     "hides": [
+      "torso"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "elvs_crude_t-shirt_male",
+     "name": "Crude t shirt male",
+     "file": "female/top_elvs_crude_t-shirt_male.glb",
+     "hides": [
+      "torso"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "ews_striped_shirt",
+     "name": "Striped shirt",
+     "file": "female/top_ews_striped_shirt.glb",
+     "hides": [
+      "torso",
+      "arms"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "namuhekam_male_polo_shirt",
+     "name": "Namuhekam male polo shirt",
+     "file": "female/top_namuhekam_male_polo_shirt.glb",
+     "hides": [
+      "torso"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "janexx_old_female_sweater",
+     "name": "Janexx old female sweater",
+     "file": "female/top_janexx_old_female_sweater.glb",
+     "hides": [
+      "torso",
+      "arms"
+     ],
+     "alpha": true
+    }
+   ],
+   "bottom": [
+    {
+     "id": "cortu_cargo_pants",
+     "name": "Cargo pants",
+     "file": "female/bottom_cortu_cargo_pants.glb",
+     "hides": [
+      "legs"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "toigo_wool_pants",
+     "name": "Wool pants",
+     "file": "female/bottom_toigo_wool_pants.glb",
+     "hides": [
+      "legs"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "cortu_jeans_shorts",
+     "name": "Jeans shorts",
+     "file": "female/bottom_cortu_jeans_shorts.glb",
+     "hides": [],
+     "alpha": true
+    }
+   ],
+   "shoes": [
+    {
+     "id": "toigo_ankle_boots_male",
+     "name": "Ankle boots male",
+     "file": "female/shoes_toigo_ankle_boots_male.glb",
+     "hides": [
+      "feet"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "toigo_ankle_boots_female",
+     "name": "Ankle boots female",
+     "file": "female/shoes_toigo_ankle_boots_female.glb",
+     "hides": [
+      "feet"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "culturalibre_male_boots",
+     "name": "Male boots",
+     "file": "female/shoes_culturalibre_male_boots.glb",
+     "hides": [
+      "feet"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "culturalibre_hero_boots_1",
+     "name": "Hero boots 1",
+     "file": "female/shoes_culturalibre_hero_boots_1.glb",
+     "hides": [
+      "feet"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "culturalibre_heroine_boots_1",
+     "name": "Heroine boots 1",
+     "file": "female/shoes_culturalibre_heroine_boots_1.glb",
+     "hides": [
+      "legs",
+      "feet"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "shoes01",
+     "name": "Shoes01",
+     "file": "female/shoes_shoes01.glb",
+     "hides": [
+      "feet"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "shoes03",
+     "name": "Shoes03",
+     "file": "female/shoes_shoes03.glb",
+     "hides": [
+      "feet"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "shoes05",
+     "name": "Shoes05",
+     "file": "female/shoes_shoes05.glb",
+     "hides": [
+      "feet"
+     ],
+     "alpha": true
+    }
+   ],
+   "gloves": [
+    {
+     "id": "toigo_gloves_short",
+     "name": "Gloves short",
+     "file": "female/gloves_toigo_gloves_short.glb",
+     "hides": [
+      "hands"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "toigo_gloves_medium",
+     "name": "Gloves medium",
+     "file": "female/gloves_toigo_gloves_medium.glb",
+     "hides": [
+      "hands"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "culturalibre_hero-heroine_gloves_1",
+     "name": "Hero heroine gloves 1",
+     "file": "female/gloves_culturalibre_hero-heroine_gloves_1.glb",
+     "hides": [
+      "hands"
+     ],
+     "alpha": true
+    },
+    {
+     "id": "culturalibre_hero-heroine_gloves_3",
+     "name": "Hero heroine gloves 3",
+     "file": "female/gloves_culturalibre_hero-heroine_gloves_3.glb",
+     "hides": [
+      "hands"
+     ],
+     "alpha": true
+    }
+   ],
+   "hat": [
+    {
+     "id": "culturalibre_motorcycle_helmet",
+     "name": "Motorcycle helmet",
+     "file": "female/hat_culturalibre_motorcycle_helmet.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "jujube_newsboy_cap",
+     "name": "Newsboy cap",
+     "file": "female/hat_jujube_newsboy_cap.glb",
+     "hides": [],
+     "alpha": false
+    },
+    {
+     "id": "fedora01",
+     "name": "Fedora01",
+     "file": "female/hat_fedora01.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "joepal_xmas_cap",
+     "name": "Xmas cap",
+     "file": "female/hat_joepal_xmas_cap.glb",
+     "hides": [],
+     "alpha": true
+    }
+   ],
+   "eyewear": [
+    {
+     "id": "kwnet_at_optical_glasses",
+     "name": "At optical glasses",
+     "file": "female/eyewear_kwnet_at_optical_glasses.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "spamrakuen_sagerfrogs_glasses_01",
+     "name": "Sagerfrogs glasses 01",
+     "file": "female/eyewear_spamrakuen_sagerfrogs_glasses_01.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "spamrakuen_sagerfrogs_glasses_03",
+     "name": "Sagerfrogs glasses 03",
+     "file": "female/eyewear_spamrakuen_sagerfrogs_glasses_03.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "toigo_round_glasses_leopard",
+     "name": "Round glasses leopard",
+     "file": "female/eyewear_toigo_round_glasses_leopard.glb",
+     "hides": [],
+     "alpha": true
+    },
+    {
+     "id": "frankyaye_glasses_library_male",
+     "name": "Glasses library male",
+     "file": "female/eyewear_frankyaye_glasses_library_male.glb",
+     "hides": [],
+     "alpha": true
+    }
+   ]
+  }
+ },
+ "eyes": [
+  {
+   "id": "blue",
+   "name": "Blue",
+   "albedo": "eyes/blue.jpg"
+  },
+  {
+   "id": "bluegreen",
+   "name": "Bluegreen",
+   "albedo": "eyes/bluegreen.jpg"
+  },
+  {
+   "id": "bobby_03_diffuse_amber_eyes",
+   "name": "Bobby 03 diffuse amber eyes",
+   "albedo": "eyes/bobby_03_diffuse_amber_eyes.jpg"
+  },
+  {
+   "id": "bobby_03_diffuse_blue_eyes",
+   "name": "Bobby 03 diffuse blue eyes",
+   "albedo": "eyes/bobby_03_diffuse_blue_eyes.jpg"
+  },
+  {
+   "id": "bobby_03_diffuse_grey_eyes",
+   "name": "Bobby 03 diffuse grey eyes",
+   "albedo": "eyes/bobby_03_diffuse_grey_eyes.jpg"
+  },
+  {
+   "id": "bobby_03_diffuse_hazel_eyes",
+   "name": "Bobby 03 diffuse hazel eyes",
+   "albedo": "eyes/bobby_03_diffuse_hazel_eyes.jpg"
+  },
+  {
+   "id": "bobby_03_diffuse_sea_breeze_eyes",
+   "name": "Bobby 03 diffuse sea breeze eyes",
+   "albedo": "eyes/bobby_03_diffuse_sea_breeze_eyes.jpg"
+  },
+  {
+   "id": "brown",
+   "name": "Brown",
+   "albedo": "eyes/brown.jpg"
+  },
+  {
+   "id": "brownlight",
+   "name": "Brownlight",
+   "albedo": "eyes/brownlight.jpg"
+  },
+  {
+   "id": "deepblue",
+   "name": "Deepblue",
+   "albedo": "eyes/deepblue.jpg"
+  },
+  {
+   "id": "green",
+   "name": "Green",
+   "albedo": "eyes/green.jpg"
+  },
+  {
+   "id": "grey",
+   "name": "Grey",
+   "albedo": "eyes/grey.jpg"
+  },
+  {
+   "id": "ice",
+   "name": "Ice",
+   "albedo": "eyes/ice.jpg"
+  },
+  {
+   "id": "lightblue",
+   "name": "Lightblue",
+   "albedo": "eyes/lightblue.jpg"
+  },
+  {
+   "id": "mindfront_brown_eye_02",
+   "name": "Brown eye 02",
+   "albedo": "eyes/mindfront_brown_eye_02.jpg"
+  },
+  {
+   "id": "nyloseth_sapphire_blue_eyes",
+   "name": "Nyloseth sapphire blue eyes",
+   "albedo": "eyes/nyloseth_sapphire_blue_eyes.jpg"
+  }
+ ],
+ "credits": []
+}

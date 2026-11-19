@@ -34,6 +34,7 @@ var _menu_sway := 0.0
 @export var presets := [["Chase", 38.0, 10.5, 60.0], ["Close", 24.0, 6.5, 66.0], ["High", 58.0, 17.0, 54.0]]
 var _preset := 0
 var photo := false
+var showcase := false
 var _photo_yaw := 0.0
 var _photo_pitch := 0.4
 var _photo_dist := 8.0
@@ -123,6 +124,16 @@ func _gameplay_position(focus: Vector3) -> Vector3:
 
 func _process(dt: float) -> void:
 	if rider == null:
+		return
+	if showcase:
+		# Customization close-up: rider on the right, menu on the left.
+		var c := rider.global_position + Vector3(0, 1.0, 0)
+		var p := c + Vector3(-0.9, 0.35, 3.3)
+		var xf := Transform3D(Basis.looking_at(c + Vector3(-0.85, -0.05, 0) - p, Vector3.UP), p)
+		global_transform = global_transform.interpolate_with(xf, 1.0 - exp(-6.0 * dt))
+		if camera.get_parent() != self:
+			camera.global_transform = global_transform
+		camera.fov = lerpf(camera.fov, 40.0, 1.0 - exp(-6.0 * dt))
 		return
 	if photo:
 		_photo(dt)

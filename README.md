@@ -135,15 +135,39 @@ godot --path . -- --scenario=long_run --invincible --duration=180 --trip-offset=
 `--trip-offset=<seconds>` starts the trip further along. Debug files are
 excluded from exports.
 
-## Rider model
+## Rider customization
 
-The rider is the imported snowboarder in `assets/characters/snowboarder/` (see
-the CREDITS.md there; confirm its licence before publishing). Its own clips do
-the riding: Idle, Turn_Left and Turn_Right are blended by how hard you lean, and
-Fall is scrubbed for the summit sit, the stand-up and wipeouts.
-`scripts/rider/rider_ik.gd` adds crouch, tuck, landing compression, grabs, the
-mushroom and the hand plant with two-bone IK on top. To use a different
-character, change `RiderAvatar.GLB` (the code expects the same bone names).
+Summit menu → **CUSTOMIZE RIDER**. The rider stands on a turntable (LB/RB or
+Q/E to rotate) and every change applies live:
+
+* **Body:** man or woman, 7–10 realistic skin tones, 16 eye colours, height, and
+  13 two-way face sliders (fullness, head and jaw width, chin, cheekbones, nose
+  size/width/bridge, mouth width, lips, eye size, ears, brow height).
+* **Hair:** 28 styles, any colour.
+* **Outfit:** 17 tops (hoodie, lusekofta ski sweater, knits, sport suit,
+  overalls...), 3 pants, 8 boots/shoes, 4 gloves, 4 hats + knit beanies, 5
+  glasses + ski goggles. Each piece can keep its own colours or be dyed to any
+  colour in the palette.
+* **Board:** 8 graphics (stripes, chevrons, split, dots, flames, trip swirl,
+  wood) with three colours.
+
+The look is saved and used on every run.
+
+**How the characters are made:** realistic bodies and clothing come from
+[MakeHuman](http://www.makehumancommunity.org) via its Blender add-on (MPFB2).
+`tools/bake_characters.py` generates everything in
+`assets/characters/human/` (bodies with face shape keys, each item fitted to
+each body, textures, `catalog.json`). To add items, add their names to `ITEMS`
+in that script and re-run it with Blender 4.2 + MPFB2 + the asset packs. In
+game, `scripts/rider/custom_rider.gd` assembles the rider,
+`scripts/rider/human_poser.gd` poses the skeleton from the game's procedural
+pose system, and skin under clothing is hidden by `shaders/skin.gdshader`.
+Credits and licences: `assets/characters/human/CREDITS.md` (CC0, plus CC-BY
+items credited in Settings).
+
+The previous riders are still available: on the **Rider** node set
+**Rider Type** to `imported` (the Onirix snowboarder, CC-BY by onirix) or
+`procedural`.
 
 ## Music, sound and full screen
 
