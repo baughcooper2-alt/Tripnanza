@@ -2,7 +2,7 @@ extends Node3D
 ## Debug scene: every rider pose side by side, seen from the gameplay angle
 ## (behind/above) and from the side. Run: godot --path . res://scenes/debug/pose_gallery.tscn
 
-const POSES := ["ride", "toe", "heel", "crouch", "pop", "air", "tuck", "land", "speed", "brake", "sit", "eat", "plant", "crash"]
+const POSES := ["ride", "left", "right", "crouch", "tuck", "land", "speed", "grab_r", "grab_l", "sit", "eat", "plant", "crash", "pop"]
 
 func _ready() -> void:
 	var env := WorldEnvironment.new()
@@ -20,13 +20,15 @@ func _ready() -> void:
 	add_child(sun)
 	var view: String = Settings.args.get("view", "side")
 	for i in POSES.size():
-		var m := RiderModel.new()
+		var m = RiderAvatar.new() if Settings.args.has("avatar") else RiderModel.new()
 		add_child(m)
 		m.position = Vector3((i % 7) * 2.4, (i / 7) * -2.6, 0)
 		m.rotation.y = PI * 0.5 if view == "back" else 0.0
 		var p: String = POSES[i]
 		for k in m.weights:
 			m.weights[k] = 1.0 if k == p else 0.0
+		if "lean" in m:
+			m.lean = -1.0 if p == "left" else (1.0 if p == "right" else 0.0)
 		m.breathe = 0.0
 		m.mushroom_visible = p == "eat"
 		m.snap()
@@ -47,9 +49,8 @@ func _ready() -> void:
 		cam.position = Vector3(7.2, -0.5, 13.0)
 		cam.look_at(Vector3(7.2, -0.9, 0))
 	cam.fov = 50
-	await get_tree().process_frame
-	await get_tree().process_frame
-	await get_tree().process_frame
+	for f in 70:
+		await get_tree().process_frame
 	await RenderingServer.frame_post_draw
 	get_viewport().get_texture().get_image().save_png(Settings.args.get("capture", "/tmp") + "/poses_%s.png" % view)
 	get_tree().quit()

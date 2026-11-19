@@ -29,10 +29,14 @@ sky = SubResource("Sky")
 ambient_light_source = 3
 ambient_light_color = Color(0.6, 0.7, 0.95, 1)
 ambient_light_sky_contribution = 0.55
-ambient_light_energy = 0.42
-tonemap_mode = 2
-tonemap_exposure = 0.95
-tonemap_white = 1.6
+ambient_light_energy = 0.7
+tonemap_mode = 3
+tonemap_exposure = 1.05
+tonemap_white = 6.0
+ssao_enabled = true
+ssao_radius = 1.5
+ssao_intensity = 1.6
+ssao_light_affect = 0.15
 glow_enabled = true
 glow_intensity = 0.35
 glow_bloom = 0.05
@@ -43,7 +47,7 @@ fog_density = 0.0013
 fog_sky_affect = 0.0
 fog_aerial_perspective = 0.35
 adjustment_enabled = true
-adjustment_saturation = 1.08
+adjustment_saturation = 1.0
 
 [sub_resource type="Curve" id="TripCurve"]
 _data = [Vector2(0, 0), 0.0, 0.6, 0, 0, Vector2(0.08, 0.06), 0.9, 0.9, 0, 0, Vector2(0.25, 0.3), 1.4, 1.4, 0, 0, Vector2(0.5, 0.56), 1.0, 1.0, 0, 0, Vector2(0.78, 0.82), 0.9, 0.9, 0, 0, Vector2(1, 1), 0.5, 0.0, 0, 0]
@@ -68,7 +72,8 @@ environment = SubResource("Env")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
 light_color = Color(1, 0.86, 0.68, 1)
-light_energy = 1.45
+light_energy = 2.2
+light_angular_distance = 0.6
 shadow_enabled = true
 shadow_bias = 0.04
 shadow_normal_bias = 1.2

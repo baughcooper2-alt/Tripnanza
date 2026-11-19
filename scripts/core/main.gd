@@ -42,6 +42,7 @@ func _ready() -> void:
 	var az := deg_to_rad(sun_azimuth_deg)
 	var to_sun := Vector3(cos(el) * sin(az), sin(el), cos(el) * cos(az))
 	sun.basis = Basis.looking_at(-to_sun, Vector3.UP)
+	terrain.terrain_material.set_shader_parameter("sun_dir", to_sun)
 	for n in [rider, cam, terrain, trip, encounters, blinkers, powder, tracks, backdrop, apparitions]:
 		n.process_mode = Node.PROCESS_MODE_PAUSABLE
 	rider.powder = powder

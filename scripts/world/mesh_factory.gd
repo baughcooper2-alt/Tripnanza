@@ -325,3 +325,144 @@ static func _branch(b: MeshBuilder, rng: RandomNumberGenerator, p: Vector3, d: V
 		var nd := (d * 1.1 + basis * Vector3(cos(a), sin(a), 0.0) * 0.9).normalized()
 		var at := p.lerp(e, rng.randf_range(0.55, 0.85))
 		_branch(b, rng, at, nd, length * 0.55, w * 0.6, depth + 1)
+
+
+# ====================================================================== realistic set
+
+## Realistic fir: smooth tapered trunk (surface 0) + drooping needle-branch cards
+## (surface 1, alpha-cut in shaders/foliage.gdshader). Base at origin, ~8 m tall.
+static func fir(variant: int) -> ArrayMesh:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 1300 + variant * 17
+	var h := 8.0 + variant * 0.6
+	var mesh := ArrayMesh.new()
+	# Trunk.
+	var tb := MeshBuilder.new()
+	var segs := 10
+	var rings := 4
+	for r in rings:
+		var y0 := h * 0.95 * r / rings
+		var y1 := h * 0.95 * (r + 1) / rings
+		var r0 := lerpf(0.26, 0.03, float(r) / rings)
+		var r1 := lerpf(0.26, 0.03, float(r + 1) / rings)
+		tb.center = Vector3(0, (y0 + y1) * 0.5, 0)
+		for i in segs:
+			var a0 := TAU * i / segs
+			var a1 := TAU * (i + 1) / segs
+			tb.quad(Vector3(cos(a0) * r0, y0, sin(a0) * r0), Vector3(cos(a1) * r0, y0, sin(a1) * r0),
+				Vector3(cos(a1) * r1, y1, sin(a1) * r1), Vector3(cos(a0) * r1, y1, sin(a0) * r1), Color(0.3, 0.22, 0.16))
+	tb.commit_smooth(mesh)
+	# Needle cards, whorl by whorl.
+	var fb := MeshBuilder.new()
+	var y := 0.9
+	var base_r := 2.6 + variant * 0.25
+	while y < h - 0.2:
+		var t := (y - 0.9) / (h - 0.9)
+		var length := base_r * pow(1.0 - t, 0.85) + 0.35
+		var count := 7 if t < 0.7 else 5
+		var off := rng.randf() * TAU
+		for i in count:
+			var a := off + TAU * i / count + rng.randf_range(-0.2, 0.2)
+			var dir := Vector3(cos(a), 0, sin(a))
+			var droop := rng.randf_range(0.25, 0.45)
+			var root := Vector3(0, y, 0) + dir * 0.1
+			var tip := root + dir * length + Vector3(0, -droop * length, 0)
+			var side := dir.cross(Vector3.UP).normalized()
+			for tilt in [0.0, 0.9]:
+				var w := side.rotated(dir, tilt) * length * 0.32
+				var up := (Vector3.UP * 0.8 + dir * 0.6).normalized()
+				var c := Color(rng.randf(), t, 0.0)
+				_card(fb, root - w * 0.4, root + w * 0.4, tip + w, tip - w, up, c)
+		y += rng.randf_range(0.38, 0.5)
+	# Leader at the top.
+	_card(fb, Vector3(-0.25, h - 0.6, 0), Vector3(0.25, h - 0.6, 0), Vector3(0.05, h + 0.4, 0), Vector3(-0.05, h + 0.4, 0), Vector3(0, 0.3, 1).normalized(), Color(0.5, 1.0, 0))
+	fb.commit(mesh)
+	return mesh
+
+
+static func _card(b: MeshBuilder, a: Vector3, c: Vector3, d: Vector3, e: Vector3, n: Vector3, col: Color) -> void:
+	# UV: x across the branch (0..1), y along it (0 at the trunk, 1 at the tip).
+	b.verts.append_array([a, c, d, a, d, e])
+	for k in 6:
+		b.normals.append(n)
+		b.colors.append(col)
+	b.uvs.append_array([Vector2(0, 0), Vector2(1, 0), Vector2(1, 1), Vector2(0, 0), Vector2(1, 1), Vector2(0, 1)])
+
+
+## Realistic boulder: subdivided icosphere displaced with ridged noise,
+## smooth normals. Shaded by shaders/rock.gdshader (triplanar rock + snow).
+static func boulder(variant: int) -> ArrayMesh:
+	var noise := FastNoiseLite.new()
+	noise.seed = 700 + variant
+	noise.frequency = 0.9
+	noise.fractal_octaves = 3
+	var t := (1.0 + sqrt(5.0)) / 2.0
+	var vs: Array = [Vector3(-1, t, 0), Vector3(1, t, 0), Vector3(-1, -t, 0), Vector3(1, -t, 0),
+		Vector3(0, -1, t), Vector3(0, 1, t), Vector3(0, -1, -t), Vector3(0, 1, -t),
+		Vector3(t, 0, -1), Vector3(t, 0, 1), Vector3(-t, 0, -1), Vector3(-t, 0, 1)]
+	var fs: Array = [[0, 11, 5], [0, 5, 1], [0, 1, 7], [0, 7, 10], [0, 10, 11], [1, 5, 9], [5, 11, 4], [11, 10, 2],
+		[10, 7, 6], [7, 1, 8], [3, 9, 4], [3, 4, 2], [3, 2, 6], [3, 6, 8], [3, 8, 9], [4, 9, 5], [2, 4, 11],
+		[6, 2, 10], [8, 6, 7], [9, 8, 1]]
+	var tris: Array = []
+	for f in fs:
+		tris.append([vs[f[0]].normalized(), vs[f[1]].normalized(), vs[f[2]].normalized()])
+	for level in 3:
+		var nt: Array = []
+		for tr in tris:
+			var a: Vector3 = tr[0]
+			var b: Vector3 = tr[1]
+			var c: Vector3 = tr[2]
+			var ab := ((a + b) * 0.5).normalized()
+			var bc := ((b + c) * 0.5).normalized()
+			var ca := ((c + a) * 0.5).normalized()
+			nt.append_array([[a, ab, ca], [b, bc, ab], [c, ca, bc], [ab, bc, ca]])
+		tris = nt
+	var squash := Vector3(1.25, 0.75 + variant * 0.08, 1.0)
+	var disp := func(p: Vector3) -> Vector3:
+		var n := noise.get_noise_3dv(p * 1.3)
+		var ridge := 1.0 - absf(noise.get_noise_3dv(p * 2.7 + Vector3(5, 1, 3)))
+		var q := p * (1.0 + n * 0.28 + ridge * 0.12)
+		q *= squash
+		q.y = maxf(q.y, -0.35)
+		return q
+	var b := MeshBuilder.new()
+	b.center = Vector3(0, 0.1, 0)
+	for tr in tris:
+		b.tri(disp.call(tr[0]), disp.call(tr[1]), disp.call(tr[2]), Color.WHITE)
+	return b.commit_smooth()
+
+
+## Realistic horizon mountain: radial grid with ridged noise ridgelines.
+static func mountain(seed: int) -> ArrayMesh:
+	var noise := FastNoiseLite.new()
+	noise.seed = seed
+	noise.frequency = 2.2
+	noise.fractal_type = FastNoiseLite.FRACTAL_RIDGED
+	noise.fractal_octaves = 4
+	var b := MeshBuilder.new()
+	var rings := 14
+	var segs := 36
+	var pts := []
+	for r in rings + 1:
+		var row := []
+		var v := float(r) / rings
+		for i in segs:
+			var a := TAU * i / segs
+			var dir := Vector2(cos(a), sin(a))
+			var rad := 1.0 - v
+			var hgt := pow(v, 1.4)
+			var n := noise.get_noise_2dv(dir * (0.3 + rad) * 1.5)
+			var p := Vector3(dir.x * rad * (1.0 + n * 0.35), hgt * (0.85 + n * 0.3), dir.y * rad * (1.0 + n * 0.35))
+			if r == rings:
+				p = Vector3(0, 1.0, 0)
+			row.append(p)
+		pts.append(row)
+	b.center = Vector3(0, 0.2, 0)
+	for r in rings:
+		for i in segs:
+			var a: Vector3 = pts[r][i]
+			var c: Vector3 = pts[r][(i + 1) % segs]
+			var d: Vector3 = pts[r + 1][(i + 1) % segs]
+			var e: Vector3 = pts[r + 1][i]
+			b.quad(a, c, d, e, Color.WHITE)
+	return b.commit_smooth()

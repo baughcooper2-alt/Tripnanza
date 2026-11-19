@@ -29,8 +29,8 @@ func _ready() -> void:
 		var h := rng.randf_range(peak_height.x, peak_height.y)
 		# Taller peaks downhill, where the camera looks.
 		h *= 0.7 + 0.5 * maxf(0.0, sin(a))
-		var mesh := MeshFactory.peak(1000 + i)
-		var xf := Transform3D(Basis().scaled(Vector3(h * 0.9, h, h * 0.8)).rotated(Vector3.UP, rng.randf() * TAU),
+		var mesh := MeshFactory.mountain(1000 + i)
+		var xf := Transform3D(Basis().scaled(Vector3(h * 1.3, h, h * 1.1)).rotated(Vector3.UP, rng.randf() * TAU),
 			Vector3(cos(a) * rad, 0, sin(a) * rad))
 		for ghost in [false, true]:
 			var mi := MeshInstance3D.new()

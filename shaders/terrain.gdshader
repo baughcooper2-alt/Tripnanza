@@ -1,11 +1,16 @@
-// Faceted snow. Every trip effect on the ground lives here, masked so that
-// the area around the rider (and directly ahead) stays readable.
+// Realistic snow: smooth slopes with wind ripples, sparkle glints, subsurface
+// translucency and rock showing through on steep faces. Every trip effect on the
+// ground also lives here, masked so the rider and the line ahead stay readable.
 shader_type spatial;
-render_mode diffuse_lambert, specular_schlick_ggx;
+render_mode diffuse_burley, specular_schlick_ggx;
 
 #include "res://shaders/trip_common.gdshaderinc"
 
-uniform vec3 snow_color : source_color = vec3(0.95, 0.965, 1.0);
+uniform vec3 snow_color : source_color = vec3(0.93, 0.95, 0.99);
+uniform vec3 rock_color : source_color = vec3(0.27, 0.26, 0.27);
+uniform vec3 sun_dir = vec3(0.6, 0.36, 0.33);     // set by Main (direction toward the sun)
+uniform vec2 wind = vec2(0.8, 0.6);
+uniform float ripple_strength = 0.35;
 uniform vec3 shadow_tint : source_color = vec3(0.62, 0.7, 0.98);
 uniform float reduced = 0.0;
 // Recent track polyline: xyz = (x, z, birth time). Updated by Tracks.
@@ -13,10 +18,12 @@ uniform vec3 track_pts[24];
 uniform int track_count = 0;
 
 varying vec3 wpos;
+varying vec3 wnorm;
 varying float d_rider;
 
 void vertex() {
 	wpos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	wnorm = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 	d_rider = length(wpos.xz - rider_pos.xz);
 	// Distant terrain slowly breathes/undulates; ground near the rider never moves.
 	float far = smoothstep(70.0, 190.0, d_rider) * (1.0 - reduced);
@@ -33,9 +40,36 @@ float seg_dist(vec2 p, vec2 a, vec2 b, out float t) {
 	return length(p - (a + ab * t));
 }
 
+float ripple(vec2 p) {
+	vec2 w = normalize(wind);
+	float warp = vnoise(p * 0.25) * 5.0 + vnoise(p * 0.9) * 1.2;
+	return sin(dot(p, w) * 2.6 + warp) * 0.5 + vnoise(p * 3.0) * 0.35;
+}
+
 void fragment() {
 	vec3 alb = snow_color * COLOR.rgb;
 	vec3 emi = vec3(0.0);
+	vec3 V = normalize((INV_VIEW_MATRIX * vec4(VIEW, 0.0)).xyz);
+	float cam_d = length(VERTEX);
+	vec3 wn = normalize(wnorm);
+	// Wind-packed patches and sastrugi ripples (fade out with distance: no shimmer).
+	alb *= mix(vec3(1.0), vec3(0.9, 0.93, 1.0), fbm(wpos.xz * 0.02) * 0.6);
+	float rs = ripple_strength * (1.0 - smoothstep(15.0, 60.0, cam_d));
+	if (rs > 0.01) {
+		float e = 0.06;
+		float r0 = ripple(wpos.xz);
+		vec2 g = vec2(ripple(wpos.xz + vec2(e, 0.0)) - r0, ripple(wpos.xz + vec2(0.0, e)) - r0) / e;
+		wn = normalize(wn - vec3(g.x, 0.0, g.y) * rs * 0.06);
+	}
+	// Rock shows through where it's too steep for snow to hold.
+	float rocky = smoothstep(0.8, 0.66, wn.y + (fbm(wpos.xz * 0.15) - 0.5) * 0.2);
+	vec3 rock = rock_color * (0.7 + 0.6 * fbm(wpos.xz * 0.7 + wpos.y * 0.3));
+	alb = mix(alb, rock, rocky);
+	// Sparkle: tiny ice crystals catching the sun close to the camera.
+	vec2 cell = floor(wpos.xz * 7.0);
+	float glint = step(0.985, hash12(cell)) * (1.0 - smoothstep(6.0, 28.0, cam_d)) * (1.0 - rocky);
+	float spec_align = pow(clamp(dot(reflect(-V, wn), normalize(sun_dir)), 0.0, 1.0), 6.0);
+	emi += vec3(1.0, 0.97, 0.9) * glint * spec_align * 2.5;
 	float near_keep = smoothstep(7.0, 26.0, d_rider);    // 0 near rider -> 1 far
 	float far_only = smoothstep(35.0, 90.0, d_rider);
 	float mid_field = smoothstep(14.0, 60.0, d_rider);
@@ -151,24 +185,18 @@ void fragment() {
 	float shimmer = 0.6 + 0.4 * sin(wpos.x * 0.6 - trip_time * 4.0);
 	emi += mix(vec3(0.4, 0.95, 1.0), hue_rgb(wpos.x * 0.03 + trip_time * 0.2), clamp(trip_intensity * 2.0, 0.0, 1.0)) * gl * gate_line_glow * shimmer;
 
-	ALBEDO = alb;
-	EMISSION = emi;
-	ROUGHNESS = 0.82;
-	SPECULAR = 0.25;
-}
-
-void light() {
-	float ndl = clamp(dot(NORMAL, LIGHT), 0.0, 1.0);
-	// Wrap the light a little so shadowed snow is cool and soft rather than grey.
-	float wrap = clamp((dot(NORMAL, LIGHT) + 0.35) / 1.35, 0.0, 1.0);
-	float lit = ndl * ATTENUATION;
-	DIFFUSE_LIGHT += LIGHT_COLOR / PI * mix(wrap * 0.1 * shadow_tint, vec3(lit), lit);
-	// Rising phase: shadows separate into ribbons of colour.
-	float shade = wrap * (1.0 - ATTENUATION);
+	// Rising phase: slopes turned away from the sun split into ribbons of colour.
+	float shade = 1.0 - smoothstep(-0.05, 0.3, dot(wn, normalize(sun_dir)));
 	if (trip_ribbons > 0.001 && shade > 0.01) {
 		float rib = sin(dot(wpos.xz, vec2(0.21, 0.07)) * 3.0 + trip_time * 0.8);
 		vec3 rc = hue_rgb(dot(wpos.xz, vec2(0.012, 0.004)) + rib * 0.08 + trip_time * 0.04 + trip_hue);
-		float ribbon = smoothstep(0.2, 0.9, abs(rib));
-		DIFFUSE_LIGHT += LIGHT_COLOR / PI * rc * shade * ribbon * trip_ribbons * 0.35;
+		emi += rc * shade * smoothstep(0.2, 0.9, abs(rib)) * trip_ribbons * 0.35;
 	}
+
+	ALBEDO = alb;
+	EMISSION = emi;
+	NORMAL = normalize((VIEW_MATRIX * vec4(wn, 0.0)).xyz);
+	ROUGHNESS = mix(0.72, 0.9, rocky);
+	SPECULAR = mix(0.5, 0.3, rocky);
+	SSS_STRENGTH = 0.3 * (1.0 - rocky);
 }

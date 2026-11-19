@@ -135,6 +135,16 @@ godot --path . -- --scenario=long_run --invincible --duration=180 --trip-offset=
 `--trip-offset=<seconds>` starts the trip further along. Debug files are
 excluded from exports.
 
+## Rider model
+
+The rider is the imported snowboarder in `assets/characters/snowboarder/` (see
+the CREDITS.md there; confirm its licence before publishing). Its own clips do
+the riding: Idle, Turn_Left and Turn_Right are blended by how hard you lean, and
+Fall is scrubbed for the summit sit, the stand-up and wipeouts.
+`scripts/rider/rider_ik.gd` adds crouch, tuck, landing compression, grabs, the
+mushroom and the hand plant with two-bone IK on top. To use a different
+character, change `RiderAvatar.GLB` (the code expects the same bone names).
+
 ## Music
 
 Select the **Music** node in `scenes/main.tscn` and drag your track (.ogg/.mp3/

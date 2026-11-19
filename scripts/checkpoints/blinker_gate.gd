@@ -34,16 +34,19 @@ func build() -> void:
 	_frame.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(_frame)
 	# Two flanking trees (solid, collidable) and small marker lights.
-	var tm := MeshFactory.tree(index % 3)
-	var tmat := ShaderMaterial.new()
-	tmat.shader = preload("res://shaders/prop.gdshader")
-	tmat.set_shader_parameter("rim_base", 0.3)
+	var tm := MeshFactory.fir(index % 3)
+	var bark := ShaderMaterial.new()
+	bark.shader = preload("res://shaders/foliage.gdshader")
+	bark.set_shader_parameter("is_foliage", 0.0)
+	var needles := ShaderMaterial.new()
+	needles.shader = bark.shader
+	tm.surface_set_material(0, bark)
+	tm.surface_set_material(1, needles)
 	for s in [-1.0, 1.0]:
 		var p := global_position + Vector3(s * (width * 0.5 + 1.2), 0, 0)
 		p.y = Mountain.terrain(p.x, p.z).w
 		var t := MeshInstance3D.new()
 		t.mesh = tm
-		t.material_override = tmat
 		add_child(t)
 		t.global_position = p - Vector3(0, 0.15, 0)
 		t.scale = Vector3.ONE * 1.05

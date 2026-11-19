@@ -53,3 +53,17 @@ func commit(mesh: ArrayMesh = null) -> ArrayMesh:
 	arr[Mesh.ARRAY_TEX_UV] = uvs
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 	return mesh
+
+
+## Like commit(), but averages normals of coincident vertices for smooth,
+## realistic shading (instead of faceted low-poly shading).
+func commit_smooth(mesh: ArrayMesh = null, snap := 0.001) -> ArrayMesh:
+	var acc := {}
+	for i in verts.size():
+		var key := (verts[i] / snap).round()
+		acc[key] = acc.get(key, Vector3.ZERO) + normals[i]
+	for i in verts.size():
+		var key := (verts[i] / snap).round()
+		var n: Vector3 = acc[key]
+		normals[i] = n.normalized() if n.length_squared() > 1e-9 else normals[i]
+	return commit(mesh)

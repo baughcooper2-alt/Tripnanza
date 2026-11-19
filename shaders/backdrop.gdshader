@@ -10,6 +10,7 @@ uniform vec3 haze : source_color = vec3(0.74, 0.8, 0.95);
 uniform float haze_amt = 0.62;
 
 varying float vy;
+varying vec3 wn;
 
 void vertex() {
 	vec3 o = MODEL_MATRIX[3].xyz;
@@ -21,13 +22,14 @@ void vertex() {
 	VERTEX.x += s * side * 0.7;
 	VERTEX.y *= 1.0 + abs(s) * 0.25 * sin(trip_time * 0.4 + o.x);
 	vy = VERTEX.y;
+	wn = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 }
 
 void fragment() {
-	vec3 n = normalize(cross(dFdx(VERTEX), dFdy(VERTEX)));
-	if (dot(n, VIEW) < 0.0) n = -n;
-	NORMAL = n;
-	vec3 c = COLOR.rgb;
+	// Snow holds on gentle slopes; dark rock shows on steep faces and ridges.
+	vec3 n = normalize(wn);
+	float snowy = smoothstep(0.45, 0.62, n.y + (vnoise(vec2(vy * 40.0, atan(n.x, n.z) * 8.0)) - 0.5) * 0.25);
+	vec3 c = mix(vec3(0.3, 0.31, 0.36), vec3(0.95, 0.96, 1.0), snowy);
 	c = mix(c, haze, haze_amt * (1.0 - vy * 0.5));
 	if (ghost > 0.5) {
 		c = hue_rgb(vy * 0.6 + trip_time * 0.05 + trip_hue) * 0.8;

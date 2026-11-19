@@ -40,14 +40,16 @@ enum State { SEATED, INTRO, RIDING, AIR, CRASHED }
 @export var rotation_accel_deg := 2600.0
 @export var untuck_decay_deg := 900.0        ## how fast rotation slows once you untuck
 @export var land_assist_deg := 45.0          ## near-upright landings get nudged straight
-@export var clean_tilt_deg := 30.0
-@export var clean_spin_deg := 24.0
-@export var sketchy_tilt_deg := 58.0
-@export var sketchy_spin_deg := 48.0
-@export var max_impact_speed := 23.0
+@export var clean_tilt_deg := 35.0
+@export var clean_spin_deg := 30.0
+@export var sketchy_tilt_deg := 80.0
+@export var sketchy_spin_deg := 68.0
+@export var max_impact_speed := 32.0
 @export_group("Collisions")
 @export var body_radius := 0.38
 @export var safe_bump_speed := 3.5
+@export var crash_into_speed := 11.0   ## only hits faster than this straight into a tree/rock end the run
+@export var bump_speed_loss := 0.45
 
 var state := State.SEATED
 var vel := Vector3.ZERO
@@ -80,7 +82,7 @@ var intro_t := 0.0
 var speed := 0.0
 var cam_heading := Vector3(0, 0, 1)
 
-var model: RiderModel
+var model   ## RiderAvatar (imported snowboarder) or RiderModel (procedural fallback)
 var powder: Powder
 var tracks: Tracks
 var _vis_q := Quaternion.IDENTITY
@@ -98,8 +100,13 @@ var grab_time := 0.0
 var _grab_armed := false
 
 
+@export var use_imported_rider := true   ## false = the original procedural rider
+
 func _ready() -> void:
-	model = RiderModel.new()
+	if use_imported_rider and ResourceLoader.exists(RiderAvatar.GLB):
+		model = RiderAvatar.new()
+	else:
+		model = RiderModel.new()
 	model.name = "Model"
 	add_child(model)
 
@@ -115,7 +122,8 @@ func reset_to_summit() -> void:
 	var g := Mountain.ground(0.0, 0.0)
 	position = Vector3(0, g.w, 0)
 	_ground_y = g.w
-	fwd = Vector3(1, 0, 0)
+	# The imported rider's sit pose already has the board across the slope.
+	fwd = Vector3(0, 0, 1) if model is RiderAvatar else Vector3(1, 0, 0)
 	normal = Vector3(g.x, g.y, g.z)
 	vel = Vector3.ZERO
 	lean = 0.0
@@ -220,6 +228,10 @@ func _physics_process(dt: float) -> void:
 	# Stance flips are animated as a quick 180 pivot.
 	_model_yaw = lerp_angle(_model_yaw, PI if switch_stance else 0.0, 1.0 - exp(-14.0 * dt))
 	model.rotation.y = _model_yaw
+	if "lean" in model:
+		# The avatar's turn clips lean the way you steer (mirrored when riding switch).
+		var steer_lean := lean if state == State.RIDING else 0.0
+		model.lean = -steer_lean if switch_stance else steer_lean
 
 
 func _ground_basis() -> Basis:
@@ -249,13 +261,14 @@ func _intro(dt: float) -> void:
 	if t >= 1.42 and t - dt < 1.42 and powder:
 		powder.burst(model.hand_r_world, Vector3.UP, 16, 2.2, 0.35)
 	# 1.6-1.9: pop up onto the board.
-	w.sit = 1.0 - smoothstep(1.5, 1.85, t)
+	w.sit = 1.0 - smoothstep(1.45, 2.05, t)
 	w.crouch = smoothstep(1.55, 1.8, t) * (1.0 - smoothstep(1.9, 2.05, t))
 	w.pop = smoothstep(1.85, 1.95, t) * (1.0 - smoothstep(2.0, 2.15, t))
 	# 1.9-2.25: hop and swing the board to point downhill.
 	var swing := smoothstep(1.9, 2.25, t)
 	var ang := -PI * 0.5 * swing
-	fwd = Vector3(1, 0, 0).rotated(Vector3.UP, ang)
+	if not (model is RiderAvatar):
+		fwd = Vector3(1, 0, 0).rotated(Vector3.UP, ang)
 	var hop := maxf(0.0, sin(clampf((t - 1.9) / 0.35, 0.0, 1.0) * PI)) * 0.35
 	model.position.y = hop
 	w.land = smoothstep(2.2, 2.28, t) * (1.0 - smoothstep(2.3, 2.6, t))
@@ -623,12 +636,17 @@ func _check_obstacles() -> void:
 		if d.length() < rr and position.y < o.pos.y + o.top and position.y + 1.6 > o.pos.y - 0.3:
 			var hv := Vector2(vel.x, vel.z)
 			var into := -hv.dot(d.normalized())
-			if (into > safe_bump_speed or vel.length() > 9.0) and not invincible:
+			if into > crash_into_speed and not invincible:
 				_crash_start("Hit a tree" if o.kind == Mountain.Kind.TREE else "Hit a rock")
 				vel *= 0.25
 				return
-			# Gentle bump: push out and slide along.
+			# Glancing hit: stumble (lose speed, wobble) and slide along it.
 			var dn := d.normalized()
+			if into > safe_bump_speed:
+				vel *= 1.0 - bump_speed_loss * clampf(into / crash_into_speed, 0.3, 1.0)
+				sketchy_t = 0.8
+				if powder:
+					powder.burst(position + Vector3(0, 1.0, 0), Vector3.UP, 12, 3.0, 0.5)
 			position.x = o.pos.x + dn.x * rr
 			position.z = o.pos.z + dn.y * rr
 			var v2 := Vector2(vel.x, vel.z)

@@ -58,7 +58,7 @@ var _t := 0.0
 var _parts := {}
 var _mat_cache := {}
 var _mushroom: MeshInstance3D
-var _prop_shader: Shader = preload("res://shaders/prop.gdshader")
+var _prop_shader: Shader = preload("res://shaders/character.gdshader")
 var hand_r_world := Vector3.ZERO
 var board_node: MeshInstance3D
 
@@ -66,28 +66,33 @@ var board_node: MeshInstance3D
 func _ready() -> void:
 	scale = Vector3.ONE * rider_scale
 	board_node = _mi("board", MeshFactory.board(board_color, Color(0.12, 0.12, 0.16)), Color.WHITE)
-	var cyl := CylinderMesh.new()
-	cyl.radial_segments = 6
-	cyl.rings = 1
-	cyl.top_radius = 1.0
-	cyl.bottom_radius = 1.0
-	cyl.height = 1.0
-	var box := BoxMesh.new()
+	# Smooth, rounded parts for the realistic look.
+	var cyl := CapsuleMesh.new()
+	cyl.radius = 1.0
+	cyl.height = 3.0
+	cyl.radial_segments = 14
+	cyl.rings = 4
+	var box := CapsuleMesh.new()
+	box.radius = 0.5
+	box.height = 1.0
+	box.radial_segments = 16
+	box.rings = 6
 	var sph := SphereMesh.new()
-	sph.radial_segments = 8
-	sph.rings = 5
+	sph.radial_segments = 20
+	sph.rings = 10
 	sph.radius = 1.0
 	sph.height = 2.0
 	var hemi := SphereMesh.new()
-	hemi.radial_segments = 8
-	hemi.rings = 3
+	hemi.radial_segments = 20
+	hemi.rings = 8
 	hemi.radius = 1.0
 	hemi.height = 1.0
 	hemi.is_hemisphere = true
 	for n in ["thigh_l", "thigh_r", "shin_l", "shin_r"]:
 		_mi(n, cyl, pants_color)
+	var hard := BoxMesh.new()
 	for n in ["boot_l", "boot_r"]:
-		_mi(n, box, Color(0.16, 0.14, 0.15))
+		_mi(n, hard, Color(0.16, 0.14, 0.15))
 	_mi("pelvis", box, pants_color)
 	_mi("torso", box, jacket_color)
 	_mi("hood", box, jacket_color.darkened(0.15))
@@ -98,7 +103,7 @@ func _ready() -> void:
 		_mi(n, box, glove_color)
 	_mi("head", sph, Color(0.85, 0.62, 0.5))
 	_mi("helmet", hemi, helmet_color)
-	_mi("goggles", box, Color(1.0, 0.72, 0.18))
+	_mi("goggles", hard, Color(1.0, 0.72, 0.18))
 	_mushroom = MeshInstance3D.new()
 	_mushroom.mesh = MeshFactory.mushroom()
 	_mushroom.material_override = _mat(Color.WHITE)
@@ -114,7 +119,7 @@ func _mat(c: Color) -> ShaderMaterial:
 	var m := ShaderMaterial.new()
 	m.shader = _prop_shader
 	m.set_shader_parameter("tint", c)
-	m.set_shader_parameter("rim_base", 0.45)
+	m.set_shader_parameter("roughness", 0.45 if c == helmet_color or c == Color(1.0, 0.72, 0.18) else 0.78)
 	_mat_cache[c] = m
 	return m
 
@@ -249,4 +254,4 @@ func _seg(n: String, a: Vector3, b: Vector3, r: float) -> void:
 	var ref := Vector3.FORWARD if absf(yn.dot(Vector3.FORWARD)) < 0.9 else Vector3.RIGHT
 	var x := yn.cross(ref).normalized()
 	var z := x.cross(yn)
-	_parts[n].transform = Transform3D(Basis(x * r, yn * len, z * r), (a + b) * 0.5)
+	_parts[n].transform = Transform3D(Basis(x * r, yn * (len / 3.0), z * r), (a + b) * 0.5)

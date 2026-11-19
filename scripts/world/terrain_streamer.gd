@@ -16,6 +16,11 @@ var rock_material: ShaderMaterial
 var ramp_material: ShaderMaterial
 var _tree_meshes: Array[ArrayMesh] = []
 var _rock_meshes: Array[ArrayMesh] = []
+var _fir_meshes: Array[ArrayMesh] = []
+var _boulder_meshes: Array[ArrayMesh] = []
+var fir_bark: ShaderMaterial
+var fir_needles: ShaderMaterial
+@export var tree_lod_distance := 210.0
 var _flag_meshes: Array[ArrayMesh] = []
 var _chunks := {}
 var _focus := Vector3.ZERO
@@ -26,12 +31,24 @@ func _ready() -> void:
 	terrain_material = ShaderMaterial.new()
 	terrain_material.shader = terrain_shader
 	tree_material = _prop_mat(true)
-	rock_material = _prop_mat(false)
-	ramp_material = _prop_mat(false)
-	ramp_material.set_shader_parameter("rim_base", 0.1)
+	rock_material = ShaderMaterial.new()
+	rock_material.shader = preload("res://shaders/rock.gdshader")
+	# Kickers are packed snow: same material as the slope (wood sides via vertex colour).
+	ramp_material = terrain_material
+	fir_bark = ShaderMaterial.new()
+	fir_bark.shader = preload("res://shaders/foliage.gdshader")
+	fir_bark.set_shader_parameter("is_foliage", 0.0)
+	fir_needles = ShaderMaterial.new()
+	fir_needles.shader = fir_bark.shader
+	fir_needles.set_shader_parameter("is_foliage", 1.0)
 	for i in 3:
 		_tree_meshes.append(MeshFactory.tree(i))
 		_rock_meshes.append(MeshFactory.rock(i))
+		var fm := MeshFactory.fir(i)
+		fm.surface_set_material(0, fir_bark)
+		fm.surface_set_material(1, fir_needles)
+		_fir_meshes.append(fm)
+		_boulder_meshes.append(MeshFactory.boulder(i))
 	_flag_meshes.append(MeshFactory.flag(Color(1.0, 0.25, 0.35)))
 	_flag_meshes.append(MeshFactory.flag(Color(0.2, 0.55, 1.0)))
 	Mountain.obstacle_removed.connect(_on_obstacle_removed)
@@ -50,7 +67,7 @@ func _prop_mat(tree: bool) -> ShaderMaterial:
 
 func _apply_settings() -> void:
 	var r := 1.0 if Settings.reduced_effects else 0.0
-	for m in [terrain_material, tree_material, rock_material]:
+	for m in [terrain_material, tree_material, fir_bark, fir_needles]:
 		m.set_shader_parameter("reduced", r)
 
 
@@ -107,49 +124,43 @@ func _build_chunk(c: Vector2i) -> Node3D:
 	var oy := Mountain.raw_height(o.x, o.y)
 	root.position = Vector3(o.x, oy, o.y)
 	add_child(root)
-	# --- terrain
+	# --- terrain: indexed grid, smooth normals (same triangles the rider touches)
 	var n := Mountain.QUADS
 	var g := Mountain.GRID
+	var w := n + 3   # one extra ring for central-difference normals
 	var hs := PackedFloat32Array()
-	hs.resize((n + 1) * (n + 1))
-	for j in n + 1:
-		for i in n + 1:
-			hs[j * (n + 1) + i] = Mountain.raw_height(o.x + i * g, o.y + j * g) - oy
+	hs.resize(w * w)
+	for j in w:
+		for i in w:
+			hs[j * w + i] = Mountain.raw_height(o.x + (i - 1) * g, o.y + (j - 1) * g) - oy
 	var verts := PackedVector3Array()
 	var norms := PackedVector3Array()
-	var cols := PackedColorArray()
-	verts.resize(n * n * 6)
-	norms.resize(n * n * 6)
-	cols.resize(n * n * 6)
+	verts.resize((n + 1) * (n + 1))
+	norms.resize((n + 1) * (n + 1))
+	for j in n + 1:
+		for i in n + 1:
+			var hc := hs[(j + 1) * w + i + 1]
+			var dx := (hs[(j + 1) * w + i + 2] - hs[(j + 1) * w + i]) / (2.0 * g)
+			var dz := (hs[(j + 2) * w + i + 1] - hs[j * w + i + 1]) / (2.0 * g)
+			verts[j * (n + 1) + i] = Vector3(i * g, hc, j * g)
+			norms[j * (n + 1) + i] = Vector3(-dx, 1.0, -dz).normalized()
+	var idx := PackedInt32Array()
+	idx.resize(n * n * 6)
 	var k := 0
 	for j in n:
 		for i in n:
-			var h00 := hs[j * (n + 1) + i]
-			var h10 := hs[j * (n + 1) + i + 1]
-			var h01 := hs[(j + 1) * (n + 1) + i]
-			var h11 := hs[(j + 1) * (n + 1) + i + 1]
-			var v00 := Vector3(i * g, h00, j * g)
-			var v10 := Vector3((i + 1) * g, h10, j * g)
-			var v01 := Vector3(i * g, h01, (j + 1) * g)
-			var v11 := Vector3((i + 1) * g, h11, (j + 1) * g)
-			var na := Vector3(-(h10 - h00) / g, 1.0, -(h11 - h10) / g).normalized()
-			var nb := Vector3(-(h11 - h01) / g, 1.0, -(h01 - h00) / g).normalized()
-			# Subtle per-facet variation: steeper facets a touch bluer.
-			var ca := Color(1, 1, 1).lerp(Color(0.8, 0.85, 1.0), clampf((1.0 - na.y) * 2.5, 0.0, 1.0)).darkened(_jit(i, j, 0))
-			var cb := Color(1, 1, 1).lerp(Color(0.8, 0.85, 1.0), clampf((1.0 - nb.y) * 2.5, 0.0, 1.0)).darkened(_jit(i, j, 1))
-			verts[k] = v00; verts[k + 1] = v10; verts[k + 2] = v11
-			verts[k + 3] = v00; verts[k + 4] = v11; verts[k + 5] = v01
-			for q in 3:
-				norms[k + q] = na
-				cols[k + q] = ca
-				norms[k + 3 + q] = nb
-				cols[k + 3 + q] = cb
+			var a := j * (n + 1) + i
+			var b := a + 1
+			var c2 := a + (n + 1)
+			var d := c2 + 1
+			idx[k] = a; idx[k + 1] = b; idx[k + 2] = d
+			idx[k + 3] = a; idx[k + 4] = d; idx[k + 5] = c2
 			k += 6
 	var arr := []
 	arr.resize(Mesh.ARRAY_MAX)
 	arr[Mesh.ARRAY_VERTEX] = verts
 	arr[Mesh.ARRAY_NORMAL] = norms
-	arr[Mesh.ARRAY_COLOR] = cols
+	arr[Mesh.ARRAY_INDEX] = idx
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arr)
 	var mi := MeshInstance3D.new()
@@ -157,7 +168,7 @@ func _build_chunk(c: Vector2i) -> Node3D:
 	mi.material_override = terrain_material
 	mi.extra_cull_margin = 12.0
 	root.add_child(mi)
-	# --- props
+	# --- props: realistic firs near, simple firs far (automatic LOD), boulders
 	var cell: Dictionary = Mountain.get_cell(c)
 	var by_mesh := {}
 	for ob in cell.obstacles:
@@ -170,19 +181,32 @@ func _build_chunk(c: Vector2i) -> Node3D:
 	for key in by_mesh:
 		var list: Array = by_mesh[key]
 		var is_tree: bool = key.begins_with("t")
-		var mm := MultiMesh.new()
-		mm.transform_format = MultiMesh.TRANSFORM_3D
-		mm.mesh = _tree_meshes[int(key.substr(1))] if is_tree else _rock_meshes[int(key.substr(1))]
-		mm.instance_count = list.size()
-		for idx in list.size():
-			var ob: Dictionary = list[idx]
-			ob.mm = mm
-			ob.idx = idx
-			mm.set_instance_transform(idx, _ob_xform(ob, root.position))
-		var mmi := MultiMeshInstance3D.new()
-		mmi.multimesh = mm
-		mmi.material_override = tree_material if is_tree else rock_material
-		root.add_child(mmi)
+		var v := int(key.substr(1))
+		var lods: Array = [[_fir_meshes[v], 0.0, tree_lod_distance]] if is_tree else [[_boulder_meshes[v], 0.0, 0.0]]
+		if is_tree:
+			lods.append([_tree_meshes[v], tree_lod_distance, 0.0])
+		for li in lods.size():
+			var mm := MultiMesh.new()
+			mm.transform_format = MultiMesh.TRANSFORM_3D
+			mm.mesh = lods[li][0]
+			mm.instance_count = list.size()
+			for ii in list.size():
+				var ob: Dictionary = list[ii]
+				if li == 0:
+					ob.mm = mm
+				else:
+					ob.mm2 = mm
+				ob.idx = ii
+				mm.set_instance_transform(ii, _ob_xform(ob, root.position))
+			var mmi := MultiMeshInstance3D.new()
+			mmi.multimesh = mm
+			if is_tree and li == 1:
+				mmi.material_override = tree_material
+			elif not is_tree:
+				mmi.material_override = rock_material
+			mmi.visibility_range_begin = lods[li][1]
+			mmi.visibility_range_end = lods[li][2]
+			root.add_child(mmi)
 	for r in cell.ramps:
 		var rm := MeshInstance3D.new()
 		rm.mesh = MeshFactory.ramp(r, root.position)
@@ -202,10 +226,6 @@ func _build_chunk(c: Vector2i) -> Node3D:
 	return root
 
 
-func _jit(i: int, j: int, k: int) -> float:
-	return float((i * 73 + j * 151 + k * 37) % 7) * 0.006
-
-
 func _ob_xform(ob: Dictionary, origin: Vector3) -> Transform3D:
 	if not ob.alive:
 		return Transform3D(Basis().scaled(Vector3.ONE * 0.0001), Vector3(0, -500, 0))
@@ -219,5 +239,7 @@ func _ob_xform(ob: Dictionary, origin: Vector3) -> Transform3D:
 
 
 func _on_obstacle_removed(ob: Dictionary) -> void:
-	if ob.mm != null and is_instance_valid(ob.mm) and ob.idx >= 0 and ob.idx < ob.mm.instance_count:
-		ob.mm.set_instance_transform(ob.idx, _ob_xform(ob, Vector3.ZERO))
+	for key in ["mm", "mm2"]:
+		var m = ob.get(key)
+		if m != null and is_instance_valid(m) and ob.idx >= 0 and ob.idx < m.instance_count:
+			m.set_instance_transform(ob.idx, _ob_xform(ob, Vector3.ZERO))

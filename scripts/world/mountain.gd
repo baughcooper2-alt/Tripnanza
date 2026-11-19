@@ -12,8 +12,8 @@ extends Node
 signal world_reset
 
 const CELL := 60.0
-const GRID := 2.5
-const QUADS := 24
+const GRID := 2.0
+const QUADS := 30
 
 enum Kind { TREE, ROCK }
 enum Section { SUMMIT, OPEN, TREES, ROCKS, JUMPS, FIRST_JUMP, BACKSIDE, SIDE }

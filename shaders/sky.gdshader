@@ -4,8 +4,10 @@ shader_type sky;
 
 #include "res://shaders/trip_common.gdshaderinc"
 
-uniform vec3 zenith : source_color = vec3(0.32, 0.5, 0.82);
-uniform vec3 horizon : source_color = vec3(0.98, 0.83, 0.7);
+uniform vec3 zenith : source_color = vec3(0.16, 0.33, 0.68);
+uniform vec3 horizon : source_color = vec3(0.78, 0.84, 0.93);
+uniform vec3 sunset : source_color = vec3(1.0, 0.72, 0.48);
+uniform float cloud_cover = 0.45;
 uniform vec3 ground_col : source_color = vec3(0.72, 0.78, 0.92);
 uniform vec3 sun_col : source_color = vec3(1.0, 0.86, 0.62);
 uniform float reduced = 0.0;
@@ -13,11 +15,21 @@ uniform float reduced = 0.0;
 void sky() {
 	vec3 d = EYEDIR;
 	float h = d.y;
-	vec3 col = mix(horizon, zenith, smoothstep(-0.02, 0.55, h));
-	col = mix(col, ground_col, smoothstep(0.0, -0.25, h));
 	vec3 sd = LIGHT0_DIRECTION;
 	float sa = max(dot(d, sd), 0.0);
-	col += sun_col * (pow(sa, 600.0) * 4.0 + pow(sa, 12.0) * 0.35);
+	// Rayleigh-ish gradient, warmer toward the low sun, with horizon haze.
+	vec3 col = mix(horizon, zenith, pow(smoothstep(-0.02, 0.6, h), 0.6));
+	col = mix(col, sunset, pow(sa, 4.0) * smoothstep(0.35, 0.0, h) * 0.6);
+	col = mix(col, ground_col, smoothstep(0.0, -0.25, h));
+	// Drifting clouds, lit from the sun side.
+	if (h > 0.01) {
+		vec2 cp = d.xz / (h + 0.12) * 1.6 + vec2(TIME * 0.004, TIME * 0.002);
+		float c = fbm(cp) * 0.7 + fbm(cp * 3.0) * 0.3;
+		float cover = smoothstep(1.0 - cloud_cover, 1.0 - cloud_cover + 0.3, c) * smoothstep(0.01, 0.15, h);
+		vec3 ccol = mix(vec3(0.72, 0.76, 0.84), vec3(1.0, 0.96, 0.9), pow(sa, 3.0) * 0.6 + 0.4);
+		col = mix(col, ccol, cover * 0.85);
+	}
+	col += sun_col * (pow(sa, 900.0) * 6.0 + pow(sa, 40.0) * 0.4 + pow(sa, 6.0) * 0.12);
 	if (!AT_CUBEMAP_PASS && trip_sky > 0.001 && h > -0.05) {
 		float k = trip_sky * (1.0 - reduced * 0.6);
 		vec2 p = d.xz / max(h + 0.35, 0.05);
