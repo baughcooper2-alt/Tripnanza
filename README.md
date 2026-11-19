@@ -121,3 +121,15 @@ excluded from exports.
 Select the **Music** node in `scenes/main.tscn` and drag your track (.ogg/.mp3/
 .wav) into its **Stream** slot. It already autoplays, and it keeps playing while paused.
 For a loop, enable *Loop* in the file's Import settings.
+
+## Status (prototype 0.1)
+
+Verified by the automated playtests on Linux (Godot 4.3, Vulkan, software renderer):
+
+* Summit → intro → first kicker (clean backflip) → BLINKER 1 → wipeout → Ride Again.
+* 3 km+ long runs: terrain keeps streaming, blinkers keep coming, and all three
+  deep-trip encounters cycle at peak intensity.
+* Reduced-effects mode at peak.
+
+The macOS and Windows exports build from `export_presets.cfg`, but they haven't
+been launched on those systems yet.
