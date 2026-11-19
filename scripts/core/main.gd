@@ -31,6 +31,9 @@ var paused := false
 var _crash_reason := ""
 var _crash_timer := -1.0
 var _restarting := false
+var _restart_hold := 0.0
+var photo := false
+@export var restart_hold_time := 0.6
 
 
 func _ready() -> void:
@@ -135,13 +138,48 @@ func _set_paused(on: bool) -> void:
 
 
 func _unhandled_input(e: InputEvent) -> void:
-	if e.is_action_pressed("pause"):
+	if photo:
+		if e.is_action_pressed("photo_mode") or e.is_action_pressed("pause") or _is_photo_combo(e):
+			_set_photo(false)
+			get_viewport().set_input_as_handled()
+		return
+	if e.is_action_pressed("photo_mode") or _is_photo_combo(e):
+		if flow == Flow.RIDING or flow == Flow.WIPEOUT:
+			_set_photo(true)
+		get_viewport().set_input_as_handled()
+	elif e.is_action_pressed("camera") and not paused:
+		ui.toast("Camera: " + cam.cycle_preset())
+		get_viewport().set_input_as_handled()
+	elif e.is_action_pressed("bail") and flow == Flow.RIDING and not paused:
+		rider.bail()
+		get_viewport().set_input_as_handled()
+	elif e.is_action_pressed("restart") and flow == Flow.WIPEOUT and _crash_timer < 0.0:
+		ride_again()
+		get_viewport().set_input_as_handled()
+	elif e.is_action_pressed("pause"):
 		if flow == Flow.RIDING or flow == Flow.INTRO:
 			_set_paused(not paused)
 		get_viewport().set_input_as_handled()
 	elif e.is_action_pressed("ride_again") and flow == Flow.WIPEOUT and _crash_timer < 0.0:
 		ride_again()
 		get_viewport().set_input_as_handled()
+
+
+## Photo mode (Steep: click both sticks). Freezes the run, hides the HUD and
+## lets you orbit the camera.
+func _set_photo(on: bool) -> void:
+	photo = on
+	get_tree().paused = on
+	cam.set_photo_mode(on)
+	ui.visible = not on
+
+
+func _is_photo_combo(e: InputEvent) -> bool:
+	if e is InputEventJoypadButton and e.pressed:
+		var l := Input.is_joy_button_pressed(e.device, JOY_BUTTON_LEFT_STICK)
+		var r := Input.is_joy_button_pressed(e.device, JOY_BUTTON_RIGHT_STICK)
+		return l and r
+	return false
 
 
 func _on_control() -> void:
@@ -180,8 +218,16 @@ func _on_crashed(reason: String) -> void:
 
 
 func _process(dt: float) -> void:
-	if paused:
+	if paused or photo:
 		return
+	# Steep: hold Y (or R) to restart the run from the summit.
+	if Input.is_action_pressed("restart") and (flow == Flow.RIDING or flow == Flow.INTRO):
+		_restart_hold += dt
+		if _restart_hold >= restart_hold_time:
+			_restart_hold = -10.0
+			ride_again()
+	else:
+		_restart_hold = 0.0
 	var rp := rider.global_position
 	terrain.set_focus(rp, rider.cam_heading)
 	backdrop.follow(rp)

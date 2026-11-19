@@ -13,7 +13,7 @@ var t := 0.0
 var phase := "menu"
 var _shots := {}
 var _log_t := 0.0
-var _ai := {steer = 0.0, forward = false, back = false, jump = false}
+var _ai := {steer = 0.0, forward = false, back = false, jump = false, grab_r = false, grab_l = false}
 var _events := []
 var _crash_target = null
 var _retry_done := false
@@ -138,10 +138,12 @@ func _first_minute() -> void:
 			_ai.steer = 0.0
 			# Backflip: hold, then release so the assist lands it clean.
 			_ai.back = absf(rider.flip) < deg_to_rad(265.0)
+			_ai.grab_r = rider.air_time > 0.25 and rider.air_time < 0.85
 			if rider.flip > PI * 0.6:
 				_shot_once("06_backflip_tuck")
 			if rider.state != Rider.State.AIR:
 				_ai.back = false
+				_ai.grab_r = false
 				_shot_once("07_landing", 0.15)
 				_set_phase("to_blinker")
 		"to_blinker":

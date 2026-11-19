@@ -31,13 +31,25 @@ func _ready() -> void:
 
 
 func _register_inputs() -> void:
+	# Controller layout follows Steep (Xbox): left stick steers and rotates in
+	# the air, right stick brakes/tucks, RT jumps, RT/LT grab in the air.
 	_action("steer_left", [KEY_A, KEY_LEFT], [], [[JOY_AXIS_LEFT_X, -1.0]])
 	_action("steer_right", [KEY_D, KEY_RIGHT], [], [[JOY_AXIS_LEFT_X, 1.0]])
-	# On the ground: tuck for speed / scrub speed. In the air: frontflip / backflip.
+	# In the air: frontflip / backflip.
 	_action("lean_forward", [KEY_W, KEY_UP], [], [[JOY_AXIS_LEFT_Y, -1.0]])
 	_action("lean_back", [KEY_S, KEY_DOWN], [], [[JOY_AXIS_LEFT_Y, 1.0]])
-	_action("jump", [KEY_SPACE], [JOY_BUTTON_A], [])
-	_action("ride_again", [KEY_R, KEY_ENTER], [JOY_BUTTON_Y], [])
+	# On the snow: tuck for speed / brake.
+	_action("tuck", [KEY_W, KEY_UP], [], [[JOY_AXIS_RIGHT_Y, -1.0]])
+	_action("brake", [KEY_S, KEY_DOWN], [], [[JOY_AXIS_RIGHT_Y, 1.0]])
+	_action("jump", [KEY_SPACE], [], [[JOY_AXIS_TRIGGER_RIGHT, 1.0]])
+	_action("grab_right", [KEY_K], [], [[JOY_AXIS_TRIGGER_RIGHT, 1.0]])
+	_action("grab_left", [KEY_J], [], [[JOY_AXIS_TRIGGER_LEFT, 1.0]])
+	_action("switch_stance", [KEY_Q], [], [])          # pad: push the sticks in opposite directions
+	_action("restart", [KEY_R], [JOY_BUTTON_Y], [])     # hold to restart from the summit
+	_action("camera", [KEY_C], [JOY_BUTTON_LEFT_SHOULDER], [])
+	_action("photo_mode", [KEY_F], [], [])              # pad: click both sticks
+	_action("bail", [KEY_X], [JOY_BUTTON_DPAD_UP], [])
+	_action("ride_again", [KEY_ENTER], [JOY_BUTTON_A], [])
 	_action("pause", [KEY_ESCAPE, KEY_P], [JOY_BUTTON_START], [])
 
 

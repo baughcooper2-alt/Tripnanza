@@ -30,6 +30,13 @@ var _focus := Vector3.ZERO
 var _pos := Vector3.ZERO
 var _shake := 0.0
 var _menu_sway := 0.0
+## LB / C cycles these: [name, pitch, distance, fov].
+@export var presets := [["Chase", 50.0, 16.0, 58.0], ["Close", 32.0, 9.0, 64.0], ["High", 68.0, 24.0, 52.0]]
+var _preset := 0
+var photo := false
+var _photo_yaw := 0.0
+var _photo_pitch := 0.4
+var _photo_dist := 8.0
 
 
 func _ready() -> void:
@@ -41,6 +48,46 @@ func _ready() -> void:
 	camera.far = 6500.0
 	camera.near = 0.15
 	top_level = true
+
+
+func cycle_preset() -> String:
+	_preset = (_preset + 1) % presets.size()
+	var p: Array = presets[_preset]
+	pitch_deg = p[1]
+	distance = p[2]
+	fov = p[3]
+	fov_at_speed = p[3] + 10.0
+	return p[0]
+
+
+func set_photo_mode(on: bool) -> void:
+	photo = on
+	process_mode = Node.PROCESS_MODE_ALWAYS if on else Node.PROCESS_MODE_PAUSABLE
+	if on:
+		var to_cam := global_position - rider.global_position
+		_photo_yaw = atan2(to_cam.x, to_cam.z)
+		_photo_dist = clampf(to_cam.length(), 3.0, 30.0)
+		_photo_pitch = asin(clampf(to_cam.y / maxf(to_cam.length(), 0.01), -0.2, 1.4))
+
+
+func _photo(dt: float) -> void:
+	var look := Vector2(Input.get_joy_axis(0, JOY_AXIS_RIGHT_X), Input.get_joy_axis(0, JOY_AXIS_RIGHT_Y))
+	look += Input.get_vector("steer_left", "steer_right", "lean_forward", "lean_back")
+	if look.length() < 0.2:
+		look = Vector2.ZERO
+	_photo_yaw -= look.x * 1.6 * dt
+	_photo_pitch = clampf(_photo_pitch - look.y * 1.2 * dt, -0.1, 1.45)
+	var zoom := Input.get_joy_axis(0, JOY_AXIS_TRIGGER_RIGHT) - Input.get_joy_axis(0, JOY_AXIS_TRIGGER_LEFT)
+	zoom += (1.0 if Input.is_key_pressed(KEY_E) else 0.0) - (1.0 if Input.is_key_pressed(KEY_Q) else 0.0)
+	_photo_dist = clampf(_photo_dist - zoom * 8.0 * dt, 2.0, 40.0)
+	var target := rider.global_position + Vector3(0, 0.9, 0)
+	var off := Vector3(sin(_photo_yaw) * cos(_photo_pitch), sin(_photo_pitch), cos(_photo_yaw) * cos(_photo_pitch)) * _photo_dist
+	var p := target + off
+	p.y = maxf(p.y, Mountain.height(p.x, p.z) + 0.5)
+	var xf := Transform3D(Basis.looking_at(target - p, Vector3.UP), p)
+	global_transform = xf
+	if camera.get_parent() != self:
+		camera.global_transform = xf
 
 
 func set_menu_mode() -> void:
@@ -76,6 +123,9 @@ func _gameplay_position(focus: Vector3) -> Vector3:
 
 func _process(dt: float) -> void:
 	if rider == null:
+		return
+	if photo:
+		_photo(dt)
 		return
 	if _transitioning:
 		_blend = minf(_blend + dt / transition_time, 1.0)

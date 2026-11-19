@@ -9,17 +9,26 @@ procedural and original (no imported assets).
 
 ## Play
 
-| Action | Keyboard | Gamepad |
-| --- | --- | --- |
-| Carve left / right (tap = small correction, hold = lean into a full carve) | A / D or ← / → | Left stick |
-| Tuck for speed (on snow) | W / ↑ | Stick up |
-| Scrub speed (on snow) | S / ↓ | Stick down |
-| Jump: hold to crouch, release to pop (release right at a kicker lip for extra pop) | Space | A / Cross |
-| In the air: frontflip / backflip | W / S | Stick up / down |
-| In the air: spin | A / D | Stick left / right |
-| Ride again after a wipeout | R / Enter | Y / Triangle |
-| Pause | Esc / P | Start |
+Controller layout follows **Steep** (Xbox):
 
+| Action | Xbox controller | Keyboard |
+| --- | --- | --- |
+| Steer / carve (tap = correction, hold = full lean) | Left stick | A / D or ← / → |
+| Brake / tuck (on snow) | Right stick down / up | S / W |
+| Jump: hold to crouch, release to pop | RT | Space |
+| In the air: frontflip / backflip | Left stick up / down | W / S |
+| In the air: spin | Left stick left / right | A / D |
+| Right-hand grab (Indy) / left-hand grab (Melon), both = Japan | RT / LT (in the air) | K / J |
+| Switch stance | Push the sticks in opposite directions | Q |
+| Restart from the summit | Hold Y | Hold R |
+| Change camera (Chase / Close / High) | LB | C |
+| Photo mode (freeze, orbit with right stick, zoom with triggers) | Click both sticks | F (orbit A/D/W/S, zoom Q/E) |
+| Deliberately fall | D-pad up | X |
+| Pause | Start | Esc / P |
+| Ride again after a wipeout | Y or A | R or Enter |
+
+* Grabs score more the longer you hold them, but still holding one at
+  touchdown makes the landing sketchy.
 * Points for distance, plus tricks you actually land. Clean landings score
   110 %, sketchy (survivable) ones 50 %. Flip + spin combos score ×1.5.
 * Holding a flip/spin input tucks the rider and rotates. Let go to untuck and

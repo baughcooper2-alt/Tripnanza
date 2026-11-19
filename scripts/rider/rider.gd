@@ -90,6 +90,12 @@ var _ground_y := 0.0
 var _spin_locked := false
 var _pitch_locked := false
 var _popped := false
+var _switch_was := false
+var _model_yaw := 0.0
+var grab_l := false
+var grab_r := false
+var grab_time := 0.0
+var _grab_armed := false
 
 
 func _ready() -> void:
@@ -146,13 +152,40 @@ func is_controllable() -> bool:
 
 func _inp() -> Dictionary:
 	if ai != null:
-		return ai
+		var d: Dictionary = ai.duplicate()
+		d.merge({tuck = ai.get("forward", false), brake = ai.get("back", false), grab_l = false, grab_r = false})
+		return d
 	return {
 		steer = Input.get_axis("steer_left", "steer_right"),
-		forward = Input.is_action_pressed("lean_forward"),
-		back = Input.is_action_pressed("lean_back"),
+		forward = Input.is_action_pressed("lean_forward"),     # air: frontflip
+		back = Input.is_action_pressed("lean_back"),           # air: backflip
+		tuck = Input.is_action_pressed("tuck"),                # snow: tuck
+		brake = Input.is_action_pressed("brake"),              # snow: brake
 		jump = Input.is_action_pressed("jump"),
+		grab_l = Input.is_action_pressed("grab_left"),
+		grab_r = Input.is_action_pressed("grab_right"),
 	}
+
+
+## Steep-style stance switch: Q, or push the two sticks in opposite directions.
+func _switch_requested() -> bool:
+	if ai != null:
+		return false
+	var pad := false
+	var lx := Input.get_joy_axis(0, JOY_AXIS_LEFT_X)
+	var rx := Input.get_joy_axis(0, JOY_AXIS_RIGHT_X)
+	if absf(lx) > 0.6 and absf(rx) > 0.6 and signf(lx) != signf(rx):
+		pad = true
+	var want := pad or Input.is_action_pressed("switch_stance")
+	var fire := want and not _switch_was
+	_switch_was = want
+	return fire
+
+
+## D-pad up / X: deliberately fall.
+func bail() -> void:
+	if state == State.RIDING or state == State.AIR:
+		_crash_start("Bailed")
 
 
 # ------------------------------------------------------------------ loop
@@ -184,7 +217,9 @@ func _physics_process(dt: float) -> void:
 	var rate := 30.0 if state == State.AIR else 16.0
 	_vis_q = _vis_q.slerp(target_q, 1.0 - exp(-rate * dt))
 	transform.basis = Basis(_vis_q)
-	model.rotation.y = PI if switch_stance else 0.0
+	# Stance flips are animated as a quick 180 pivot.
+	_model_yaw = lerp_angle(_model_yaw, PI if switch_stance else 0.0, 1.0 - exp(-14.0 * dt))
+	model.rotation.y = _model_yaw
 
 
 func _ground_basis() -> Basis:
@@ -241,8 +276,10 @@ func _intro(dt: float) -> void:
 func _ride(dt: float) -> void:
 	var i := _inp()
 	var s: float = i.steer
-	braking = i.back
-	tucking = i.forward and not braking
+	braking = i.brake
+	tucking = i.tuck and not braking
+	if _switch_requested() and vel.length() > 1.0:
+		switch_stance = not switch_stance
 	# Lean builds while a direction is held; quick taps barely lean.
 	if absf(s) > 0.05:
 		var rate := 1.0 / lean_build_time
@@ -374,10 +411,16 @@ func _take_off(from_lip: bool) -> void:
 	var hv := Vector3(vel.x, 0, vel.z)
 	air_head = fwd if hv.length() < 1.0 else fwd
 	_last_trick = ""
+	_grab_seen = ""
 	# Unplanned air (rolling off a lip or roller without popping): inputs that
 	# were already held for carving or tucking don't start a spin or flip until
 	# they are released and pressed again. A deliberate pop allows pre-winding.
 	var i := _inp()
+	grab_l = false
+	grab_r = false
+	grab_time = 0.0
+	# RT is both jump and right grab: it only grabs after it's been let go.
+	_grab_armed = not i.jump
 	_spin_locked = not _popped and absf(i.steer) > 0.1
 	_pitch_locked = not _popped and (i.forward or i.back)
 	_popped = false
@@ -405,6 +448,13 @@ func _air(dt: float) -> void:
 	var gn := Vector3(gr.x, gr.y, gr.z)
 	max_air_height = maxf(max_air_height, position.y - gr.w)
 	# Rotation: hold to tuck and rotate, release to untuck and slow down.
+	# Grabs: RT / K = right hand (Indy), LT / J = left hand (Melon), both = Japan.
+	if not i.jump:
+		_grab_armed = true
+	grab_r = i.grab_r and _grab_armed
+	grab_l = i.grab_l
+	if grab_l or grab_r:
+		grab_time += dt
 	var pitch_in := (1.0 if i.back else 0.0) - (1.0 if i.forward else 0.0)
 	var spin_in: float = i.steer
 	if _spin_locked:
@@ -446,7 +496,9 @@ func _air(dt: float) -> void:
 		_last_trick = t
 		trick_changed.emit(t)
 	var rot01 := clampf(absf(flip_vel) / deg_to_rad(flip_speed_deg) + absf(spin_vel) / deg_to_rad(spin_speed_deg) * 0.6, 0.0, 1.0)
-	_set_weights({air = 1.0 - rot01, tuck = rot01, pop = 1.0 if pop_t > 0.15 else 0.0})
+	var gw := 1.0 if (grab_l or grab_r) else 0.0
+	_set_weights({air = (1.0 - rot01) * (1.0 - gw), tuck = rot01 * (1.0 - gw * 0.6), pop = 1.0 if pop_t > 0.15 else 0.0,
+		grab_r = 1.0 if grab_r else 0.0, grab_l = 1.0 if grab_l else 0.0})
 	model.flail = 0.0
 	_check_obstacles()
 	if state != State.AIR:
@@ -469,7 +521,8 @@ func _land(n: Vector3) -> void:
 	var quality := "clean"
 	if tilt > sketchy_tilt_deg or spin_err > sketchy_spin_deg or impact > max_impact_speed:
 		quality = "crash"
-	elif tilt > clean_tilt_deg or spin_err > clean_spin_deg or impact > max_impact_speed * 0.8:
+	elif tilt > clean_tilt_deg or spin_err > clean_spin_deg or impact > max_impact_speed * 0.8 or grab_l or grab_r:
+		# Still holding a grab at touchdown is sketchy, like in Steep.
 		quality = "sketchy"
 	var result := trick_result()
 	result.quality = quality
@@ -515,6 +568,8 @@ func trick_result() -> Dictionary:
 		pts += int(air_time * 60.0)
 	pts += spins * 120
 	pts += flips * 500
+	if grab_time >= 0.25:
+		pts += 150 + int(grab_time * 200.0)
 	if flips > 0 and spins > 0:
 		pts = int(pts * 1.5)
 	return {name = name, flips = flips, spins = spins, air = air_time, points = pts,
@@ -532,6 +587,9 @@ func trick_name(final: bool) -> String:
 		parts.append(["", "", "Double ", "Triple ", "Quad "][mini(flips, 4)] + fname)
 	if spins > 0:
 		parts.append(str(spins * 180))
+	var g := grab_name()
+	if g != "":
+		parts.append(g)
 	if parts.is_empty():
 		if air_time > 1.1 or max_air_height > 2.5:
 			return "Big Air"
@@ -541,6 +599,19 @@ func trick_name(final: bool) -> String:
 	if switch_stance and spins == 0:
 		parts.push_front("Switch")
 	return " ".join(parts)
+
+
+var _grab_seen := ""
+
+## The grab you've been holding this air (kept after you let go).
+func grab_name() -> String:
+	if grab_l and grab_r:
+		_grab_seen = "Japan"
+	elif grab_r and _grab_seen == "":
+		_grab_seen = "Indy"
+	elif grab_l and _grab_seen == "":
+		_grab_seen = "Melon"
+	return _grab_seen if grab_time >= 0.25 or (grab_l or grab_r) else ""
 
 
 # ------------------------------------------------------------------ collisions & crash

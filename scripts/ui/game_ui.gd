@@ -151,11 +151,11 @@ func _build_menu() -> void:
 	col.add_child(_spacer(10))
 	best_label = _label("", 20, WHITE, 4)
 	col.add_child(best_label)
-	var help := _label("A/D or ←/→  carve    SPACE  hold + release to jump\nIn the air:  W/S  front/backflip    A/D  spin\nOn snow:  W  tuck    S  scrub speed", 15, Color(1, 1, 1, 0.85), 4)
+	var help := _label("Controller (Steep layout): left stick steer / flip / spin · RT jump · RT/LT grab · right stick brake / tuck · LB camera · hold Y restart\nKeyboard: A/D carve · Space jump · W/S flip (air) or tuck/brake (snow) · J/K grab · Q switch · C camera · F photo · hold R restart · X bail", 14, Color(1, 1, 1, 0.85), 4)
 	help.anchor_top = 1.0
 	help.anchor_bottom = 1.0
 	help.offset_left = 64
-	help.offset_top = -96
+	help.offset_top = -78
 	menu.add_child(help)
 	_build_settings()
 
@@ -506,6 +506,29 @@ func powder_wipe(mid: Callable) -> void:
 	tw.tween_property(wipe_rect, "color:a", 1.0, 0.16)
 	tw.tween_callback(mid)
 	tw.tween_property(wipe_rect, "color:a", 0.0, 0.32)
+
+
+## Small message at the bottom of the screen (camera changes, etc.).
+func toast(text: String) -> void:
+	if _toast == null:
+		_toast = _label("", 20, WHITE, 5)
+		_toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_toast.anchor_left = 0.5
+		_toast.anchor_right = 0.5
+		_toast.anchor_top = 1.0
+		_toast.anchor_bottom = 1.0
+		_toast.offset_left = -200
+		_toast.offset_right = 200
+		_toast.offset_top = -70
+		add_child(_toast)
+	_toast.text = text
+	_toast.modulate.a = 1.0
+	var tw := create_tween()
+	tw.tween_interval(1.2)
+	tw.tween_property(_toast, "modulate:a", 0.0, 0.4)
+
+
+var _toast: Label
 
 
 static func _fmt(n: int) -> String:

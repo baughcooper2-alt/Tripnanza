@@ -38,10 +38,12 @@ const POSES := {
 	eat = {rs_x = -150.0, rs_z = -8.0, re = 135.0, head_pitch = -12.0, head_yaw = -12.0},
 	plant = {hip_y = 0.34, hip_z = -0.34, side = 14.0, bend = -10.0, rs_x = 55.0, rs_z = -35.0, re = 5.0,
 		ls_x = -70.0, ls_z = 30.0, head_yaw = 10.0, pole_up = 1.0},
+	grab_r = {hip_y = 0.5, hip_z = 0.04, bend = 50.0, rs_x = -95.0, rs_z = 10.0, re = 15.0, ls_z = 80.0, ls_x = -10.0, pole_up = 0.6},
+	grab_l = {hip_y = 0.52, hip_z = -0.04, bend = 34.0, ls_x = 55.0, ls_z = -5.0, le = 10.0, rs_z = -80.0, rs_x = -10.0, pole_up = 0.6},
 	crash = {hip_y = 0.22, hip_z = -0.35, bend = -75.0, side = 20.0, ls_x = 0.0, ls_z = 120.0, le = 10.0,
 		rs_x = 0.0, rs_z = -120.0, re = 10.0, head_pitch = -20.0, pole_up = 1.0},
 }
-const ADDITIVE := ["toe", "heel", "crouch", "pop", "tuck", "land", "speed", "brake", "air"]
+const ADDITIVE := ["toe", "heel", "crouch", "pop", "tuck", "land", "speed", "brake", "air", "grab_r", "grab_l"]
 const OVERRIDE := ["sit", "plant", "eat", "crash"]
 
 ## Target weights set by the rider controller every frame.
