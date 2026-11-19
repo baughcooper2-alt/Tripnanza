@@ -136,10 +136,6 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Music" type="AudioStreamPlayer" parent="."]
-process_mode = 3
-autoplay = true
-
 [node name="UI" type="CanvasLayer" parent="."]
 layer = 10
 script = ExtResource("10_ui")

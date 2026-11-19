@@ -12,7 +12,7 @@ signal crashed(reason: String)
 enum State { SEATED, INTRO, RIDING, AIR, CRASHED }
 
 @export_group("Handling")
-@export var gravity := 13.0
+@export var gravity := 11.0                 ## closer to real 9.81 than before, still snappy
 @export var tap_turn_rate := 0.5            ## rad/s while a direction is held, before lean builds
 @export var carve_turn_rate := 1.15           ## extra rad/s at full lean
 @export var lean_build_time := 0.55          ## seconds of holding to reach a full carve
@@ -26,6 +26,17 @@ enum State { SEATED, INTRO, RIDING, AIR, CRASHED }
 @export var brake_decel := 9.0
 @export var max_speed := 36.0
 @export var start_push := 5.0
+@export_group("Carving physics")
+@export var sidecut_radius := 8.0            ## board sidecut (m): carve radius = sidecut / sin(edge angle)
+@export var max_edge_deg := 62.0
+@export var edge_grip_g := 2.3               ## lateral grip before the edge washes out into a skid (in g)
+@export var skid_overturn := 0.35            ## how much of an over-hard carve still rotates the board when skidding
+@export var pivot_rate := 1.9                ## rad/s of skidded pivot at walking speed
+@export var pivot_fade_speed := 9.0
+@export_group("Controller")
+@export var stick_deadzone := 0.14
+@export var stick_expo := 1.35               ## >1 = finer control near centre
+@export var stick_response := 10.0           ## how quickly the edge follows the stick
 @export_group("Jumping")
 @export var ollie_strength := 4.6
 @export var ollie_charge_bonus := 2.6
@@ -98,6 +109,9 @@ var grab_l := false
 var grab_r := false
 var grab_time := 0.0
 var _grab_armed := false
+var using_pad := false
+var skid := 0.0                 ## 0 = clean carve, 1 = full skid (sound, spray)
+var _was_grabbing := false
 
 
 @export var use_imported_rider := true   ## false = the original procedural rider
@@ -163,8 +177,21 @@ func _inp() -> Dictionary:
 		var d: Dictionary = ai.duplicate()
 		d.merge({tuck = ai.get("forward", false), brake = ai.get("back", false), grab_l = false, grab_r = false})
 		return d
+	var steer := Input.get_axis("steer_left", "steer_right")
+	var pitch := Input.get_axis("lean_forward", "lean_back")
+	var stick := Vector2(Input.get_joy_axis(0, JOY_AXIS_LEFT_X), Input.get_joy_axis(0, JOY_AXIS_LEFT_Y))
+	if stick.length() > stick_deadzone:
+		# Radial deadzone + expo curve: small moves = small corrections.
+		var m := pow(clampf((stick.length() - stick_deadzone) / (1.0 - stick_deadzone), 0.0, 1.0), stick_expo)
+		var sv := stick.normalized() * m
+		using_pad = true
+		steer = sv.x
+		pitch = sv.y
+	elif absf(steer) > 0.5 or absf(pitch) > 0.5:
+		using_pad = Input.get_connected_joypads().size() > 0 and absf(stick.x) > 0.05
 	return {
-		steer = Input.get_axis("steer_left", "steer_right"),
+		steer = steer,
+		pitch = pitch,
 		forward = Input.is_action_pressed("lean_forward"),     # air: frontflip
 		back = Input.is_action_pressed("lean_back"),           # air: backflip
 		tuck = Input.is_action_pressed("tuck"),                # snow: tuck
@@ -211,6 +238,8 @@ func _physics_process(dt: float) -> void:
 		State.CRASHED:
 			_crash(dt)
 	speed = vel.length()
+	Audio.set_riding(state == State.RIDING, speed, maxf(absf(lean), skid), braking and state == State.RIDING,
+		state == State.AIR, absf(flip_vel) + absf(spin_vel))
 	var hv := Vector3(vel.x, 0, vel.z)
 	if hv.length() > 2.0:
 		cam_heading = cam_heading.slerp(hv.normalized(), 1.0 - exp(-(1.2 if state == State.AIR else 2.6) * dt)).normalized()
@@ -258,6 +287,14 @@ func _intro(dt: float) -> void:
 	model.mushroom_visible = t > 0.18 and t < 1.0
 	# 1.15-1.6: plant a gloved hand in the snow.
 	w.plant = smoothstep(1.1, 1.4, t) * (1.0 - smoothstep(1.55, 1.8, t))
+	if t >= 0.5 and t - dt < 0.5:
+		Audio.play("munch", 0.7)
+	if t >= 0.8 and t - dt < 0.8:
+		Audio.play("munch", 0.6, 0.9)
+	if t >= 1.42 and t - dt < 1.42:
+		Audio.play("puff", 0.7)
+	if t >= 1.9 and t - dt < 1.9:
+		Audio.play("whoosh", 0.5)
 	if t >= 1.42 and t - dt < 1.42 and powder:
 		powder.burst(model.hand_r_world, Vector3.UP, 16, 2.2, 0.35)
 	# 1.6-1.9: pop up onto the board.
@@ -281,6 +318,7 @@ func _intro(dt: float) -> void:
 		land_comp = 0.5
 		if powder:
 			powder.burst(global_position, Vector3.UP, 10, 2.5, 0.4)
+		Audio.play("board_slap", 0.8)
 		control_started.emit()
 
 
@@ -293,8 +331,12 @@ func _ride(dt: float) -> void:
 	tucking = i.tuck and not braking
 	if _switch_requested() and vel.length() > 1.0:
 		switch_stance = not switch_stance
-	# Lean builds while a direction is held; quick taps barely lean.
-	if absf(s) > 0.05:
+		Audio.play("board_slap", 0.6)
+	if using_pad:
+		# The stick sets the edge angle directly.
+		lean = move_toward(lean, s, stick_response * dt)
+	elif absf(s) > 0.05:
+		# Keyboard: lean builds while a key is held; quick taps barely lean.
 		var rate := 1.0 / lean_build_time
 		if signf(s) != signf(lean) and absf(lean) > 0.05:
 			rate *= edge_switch_boost
@@ -302,10 +344,28 @@ func _ride(dt: float) -> void:
 	else:
 		lean = move_toward(lean, 0.0, lean_release_rate * dt)
 	var spd := vel.length()
-	var speed_fac := clampf(1.15 - spd / 60.0, 0.6, 1.1)
-	var turn := (s * tap_turn_rate + lean * carve_turn_rate) * speed_fac
+	# Carving: radius from sidecut and edge angle, limited by edge grip.
+	var edge := lean * deg_to_rad(max_edge_deg)
+	var carve_w := 0.0
+	if absf(edge) > 0.03:
+		# More edge = tighter arc (full edge ~ sidecut radius); small edges carve wide.
+		var radius := maxf(sidecut_radius / sin(absf(edge)), 2.5)
+		carve_w = spd / radius
+		var w_max := edge_grip_g * 9.81 / maxf(spd, 0.5)
+		if carve_w > w_max:
+			skid = clampf((carve_w - w_max) / maxf(carve_w, 0.01), 0.0, 1.0)
+			carve_w = w_max + (carve_w - w_max) * skid_overturn
+		else:
+			skid = move_toward(skid, 0.0, dt * 4.0)
+		carve_w *= signf(edge)
+	else:
+		skid = move_toward(skid, 0.0, dt * 4.0)
+	# Pivot: at low speed the board can be twisted round with the feet.
+	var pivot_w := s * pivot_rate * (1.0 - smoothstep(0.0, pivot_fade_speed, spd))
+	var turn := carve_w + pivot_w + s * tap_turn_rate * 0.25
 	if braking:
 		turn *= 0.6
+		skid = maxf(skid, 0.8)
 	fwd = fwd.rotated(normal, -turn * dt)
 	# Gravity along the slope.
 	var g := Vector3(0, -gravity, 0)
@@ -323,17 +383,18 @@ func _ride(dt: float) -> void:
 		vl = -vl
 		switch_stance = not switch_stance
 	# Edge grip turns sideways slide into forward speed (carving keeps speed).
-	var grip := edge_grip * (0.45 + 0.55 * absf(lean))
+	var grip := edge_grip * (0.45 + 0.55 * absf(lean)) * (1.0 - skid * 0.65)
 	if braking:
 		grip = 2.2
 	var new_vl := vl * exp(-grip * dt)
 	var lost := vl * vl - new_vl * new_vl
-	vf = sqrt(maxf(vf * vf + lost * (0.0 if braking else carve_speed_keep), 0.0))
+	# A clean carve keeps its speed; a skid scrubs it off.
+	vf = sqrt(maxf(vf * vf + lost * (0.0 if braking else carve_speed_keep * (1.0 - skid * 0.7)), 0.0))
 	vel = fwd * vf + lat * new_vl
 	# Resistance.
 	spd = vel.length()
 	var drag := air_drag * (tuck_drag_mult if tucking else 1.0)
-	var decel := snow_friction * gravity * normal.y + drag * spd * spd + absf(lean) * 0.25
+	var decel := snow_friction * gravity * normal.y + drag * spd * spd + absf(lean) * 0.15 + skid * 1.8
 	if braking:
 		decel += brake_decel
 	if spd > 0.001:
@@ -361,6 +422,8 @@ func _ride(dt: float) -> void:
 		position.y = maxf(position.y, gr.w)
 		vel += nn * pop
 		_popped = true
+		Audio.play("pop", 0.6 + charge * 0.4)
+		Audio.rumble(0.25, 0.0, 0.08)
 		_take_off(false)
 		pop_t = 0.3
 		return
@@ -398,7 +461,7 @@ func _ground_fx(dt: float, lat: Vector3) -> void:
 		tracks.add(position, fwd, normal, lean if not switch_stance else -lean, now())
 	if powder == null or spd < 4.0:
 		return
-	var amount := absf(lean) * spd * 0.55 + (spd * 0.8 if braking else 0.0)
+	var amount := absf(lean) * spd * 0.55 + (spd * 0.8 if braking else 0.0) + skid * spd * 0.7
 	var n := int(amount * dt * 4.0 + randf())
 	var side := signf(lean) if absf(lean) > 0.05 else 0.0
 	for k in n:
@@ -450,6 +513,8 @@ func _air(dt: float) -> void:
 	var jump: bool = i.jump
 	if _jump_was and not jump and since_takeoff < lip_pop_window and from_ramp:
 		vel.y += lip_pop_bonus + charge * ollie_charge_bonus * 0.5
+		Audio.play("pop", 0.9, 1.1)
+		Audio.rumble(0.3, 0.1, 0.1)
 		pop_t = 0.3
 		charge = 0.0
 		_spin_locked = false
@@ -468,7 +533,10 @@ func _air(dt: float) -> void:
 	grab_l = i.grab_l
 	if grab_l or grab_r:
 		grab_time += dt
-	var pitch_in := (1.0 if i.back else 0.0) - (1.0 if i.forward else 0.0)
+	if (grab_l or grab_r) and not _was_grabbing:
+		Audio.play("grab", 0.6)
+	_was_grabbing = grab_l or grab_r
+	var pitch_in: float = i.get("pitch", (1.0 if i.back else 0.0) - (1.0 if i.forward else 0.0))
 	var spin_in: float = i.steer
 	if _spin_locked:
 		if absf(spin_in) < 0.1:
@@ -565,6 +633,13 @@ func _land(n: Vector3) -> void:
 	spin = 0.0
 	state = State.RIDING
 	_jump_was = false
+	if quality == "sketchy":
+		Audio.play("sketchy", 0.9)
+	elif impact > 9.0:
+		Audio.play("land", clampf(impact / 16.0, 0.5, 1.0))
+	else:
+		Audio.play("land_soft", clampf(0.4 + impact / 12.0, 0.4, 0.9))
+	Audio.rumble(clampf(0.2 + impact / 30.0, 0.0, 0.8), clampf(impact / 26.0, 0.0, 0.8), 0.12 + impact * 0.008)
 	if powder:
 		var count := 14 + int(impact * 1.5)
 		powder.burst(position, n, count, 2.0 + impact * 0.25, 0.5)
@@ -645,6 +720,8 @@ func _check_obstacles() -> void:
 			if into > safe_bump_speed:
 				vel *= 1.0 - bump_speed_loss * clampf(into / crash_into_speed, 0.3, 1.0)
 				sketchy_t = 0.8
+				Audio.play("bump", clampf(into / crash_into_speed, 0.4, 1.0))
+				Audio.rumble(0.5, 0.6, 0.2)
 				if powder:
 					powder.burst(position + Vector3(0, 1.0, 0), Vector3.UP, 12, 3.0, 0.5)
 			position.x = o.pos.x + dn.x * rr
@@ -661,6 +738,8 @@ func _crash_start(reason: String) -> void:
 	crash_spin = Vector3(randf_range(-2, 2), randf_range(-3, 3), randf_range(2, 4))
 	_set_weights({crash = 1.0})
 	model.flail = 0.0
+	Audio.play("crash", 1.0)
+	Audio.rumble(0.8, 1.0, 0.5)
 	if powder:
 		powder.burst(position + Vector3(0, 0.5, 0), Vector3.UP, 40, 5.0, 0.7)
 	crashed.emit(reason)

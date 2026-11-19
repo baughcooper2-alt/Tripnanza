@@ -15,6 +15,7 @@ config/icon="res://icon.svg"
 
 Settings="*res://scripts/core/settings.gd"
 Mountain="*res://scripts/world/mountain.gd"
+Audio="*res://scripts/core/audio.gd"
 
 [display]
 

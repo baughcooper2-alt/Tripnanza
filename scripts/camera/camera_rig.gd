@@ -6,10 +6,10 @@ extends Node3D
 ## The summit menu shot blends into the gameplay shot without a cut.
 
 @export_group("Gameplay framing")
-@export_range(10.0, 80.0) var pitch_deg := 50.0          ## camera elevation angle above the rider
-@export var distance := 16.0
-@export var fov := 58.0
-@export var fov_at_speed := 68.0
+@export_range(10.0, 80.0) var pitch_deg := 38.0          ## camera elevation angle above the rider
+@export var distance := 10.5
+@export var fov := 60.0
+@export var fov_at_speed := 70.0
 @export var speed_for_fov := 32.0
 @export_range(0.5, 0.85) var rider_screen_y := 0.68      ## 0.5 = centre, 0.67 = lower third
 @export var look_ahead := 3.0
@@ -31,7 +31,7 @@ var _pos := Vector3.ZERO
 var _shake := 0.0
 var _menu_sway := 0.0
 ## LB / C cycles these: [name, pitch, distance, fov].
-@export var presets := [["Chase", 50.0, 16.0, 58.0], ["Close", 32.0, 9.0, 64.0], ["High", 68.0, 24.0, 52.0]]
+@export var presets := [["Chase", 38.0, 10.5, 60.0], ["Close", 24.0, 6.5, 66.0], ["High", 58.0, 17.0, 54.0]]
 var _preset := 0
 var photo := false
 var _photo_yaw := 0.0

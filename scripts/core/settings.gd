@@ -10,6 +10,9 @@ const SAVE_PATH := "user://tripnanza.cfg"
 var reduced_effects := false
 var trip_strength := 1.0          # 0..1.5 multiplier on every trip effect
 var fullscreen := false
+var music_volume := 0.8
+var sfx_volume := 0.75
+var rumble := true
 var best_score := 0
 var best_distance := 0.0
 var best_trick := ""
@@ -19,6 +22,7 @@ var args := {}
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	for a in OS.get_cmdline_user_args():
 		var s := String(a).trim_prefix("--")
 		var kv := s.split("=", true, 1)
@@ -51,6 +55,7 @@ func _register_inputs() -> void:
 	_action("bail", [KEY_X], [JOY_BUTTON_DPAD_UP], [])
 	_action("ride_again", [KEY_ENTER], [JOY_BUTTON_A], [])
 	_action("pause", [KEY_ESCAPE, KEY_P], [JOY_BUTTON_START], [])
+	_action("fullscreen", [KEY_F11], [JOY_BUTTON_BACK], [])   # also Alt+Enter
 
 
 func _action(name: String, keys: Array, buttons: Array, axes: Array) -> void:
@@ -80,6 +85,9 @@ func load_settings() -> void:
 	reduced_effects = c.get_value("settings", "reduced_effects", reduced_effects)
 	trip_strength = c.get_value("settings", "trip_strength", trip_strength)
 	fullscreen = c.get_value("settings", "fullscreen", fullscreen)
+	music_volume = c.get_value("settings", "music_volume", music_volume)
+	sfx_volume = c.get_value("settings", "sfx_volume", sfx_volume)
+	rumble = c.get_value("settings", "rumble", rumble)
 	best_score = c.get_value("best", "score", best_score)
 	best_distance = c.get_value("best", "distance", best_distance)
 	best_trick = c.get_value("best", "trick", best_trick)
@@ -92,6 +100,9 @@ func save_settings() -> void:
 	c.set_value("settings", "reduced_effects", reduced_effects)
 	c.set_value("settings", "trip_strength", trip_strength)
 	c.set_value("settings", "fullscreen", fullscreen)
+	c.set_value("settings", "music_volume", music_volume)
+	c.set_value("settings", "sfx_volume", sfx_volume)
+	c.set_value("settings", "rumble", rumble)
 	c.set_value("best", "score", best_score)
 	c.set_value("best", "distance", best_distance)
 	c.set_value("best", "trick", best_trick)
@@ -117,12 +128,39 @@ func set_fullscreen(v: bool) -> void:
 	changed.emit()
 
 
+func set_volume(music: float, sfx: float) -> void:
+	music_volume = music
+	sfx_volume = sfx
+	var a := get_node_or_null("/root/Audio")
+	if a:
+		a.music_volume = music
+		a.sfx_volume = sfx
+		a.apply_volumes()
+	save_settings()
+
+
+func set_rumble(v: bool) -> void:
+	rumble = v
+	save_settings()
+
+
+func toggle_fullscreen() -> void:
+	set_fullscreen(not fullscreen)
+
+
+## F11 / Alt+Enter / Xbox View button toggle full screen from anywhere.
+func _unhandled_input(e: InputEvent) -> void:
+	if e.is_action_pressed("fullscreen") or (e is InputEventKey and e.pressed and not e.echo and e.keycode == KEY_ENTER and e.alt_pressed):
+		toggle_fullscreen()
+		get_viewport().set_input_as_handled()
+
+
 func _apply_window() -> void:
 	if args.has("capture") or DisplayServer.get_name() == "headless":
 		return
 	if fullscreen:
-		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)
-	elif DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN if OS.get_name() == "Windows" else DisplayServer.WINDOW_MODE_FULLSCREEN)
+	elif DisplayServer.window_get_mode() in [DisplayServer.WINDOW_MODE_FULLSCREEN, DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN]:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
 
 

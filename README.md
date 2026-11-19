@@ -145,11 +145,21 @@ Fall is scrubbed for the summit sit, the stand-up and wipeouts.
 mushroom and the hand plant with two-bone IK on top. To use a different
 character, change `RiderAvatar.GLB` (the code expects the same bone names).
 
-## Music
+## Music, sound and full screen
 
-Select the **Music** node in `scenes/main.tscn` and drag your track (.ogg/.mp3/
-.wav) into its **Stream** slot. It already autoplays, and it keeps playing while paused.
-For a loop, enable *Loop* in the file's Import settings.
+* **Music:** `assets/music/` (High Hills, I Can Fly Away) plays as a crossfading
+  playlist. As the trip deepens the music picks up phaser, chorus and echo.
+  Add or reorder tracks in `MUSIC` at the top of `scripts/core/audio.gd`.
+* **Sound effects** are synthesized in code at startup (no files needed): snow
+  carve, skid/brake scrape, wind, spin whoosh, pop, landings (clean/hard/sketchy),
+  crashes, tree bumps, grabs, trick chimes, blinker bell, phase swell, the summit
+  intro (munch, hand plant, board slap) and UI ticks. To use a recorded sound
+  instead, map its name to a file in `SFX_OVERRIDES`.
+* **Controller rumble** on pops, landings, bumps, crashes and blinkers (can be
+  turned off in Settings).
+* **Full screen:** F11, Alt+Enter, the Xbox View button, or Settings. The choice
+  is remembered.
+* Settings also has music and effects volume.
 
 ## Status (prototype 0.1)
 

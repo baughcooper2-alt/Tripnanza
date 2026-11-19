@@ -9,7 +9,7 @@ signal menu_pressed
 signal resume_pressed
 
 ## Shown bottom-right on the summit menu so you can tell which version is running.
-const BUILD := "0.4 · realistic + your snowboarder"
+const BUILD := "0.5 · music, sound, physics, closer camera"
 const WHITE := Color(1, 1, 1)
 const INK := Color(0.08, 0.1, 0.2)
 const ORANGE := Color(1.0, 0.42, 0.12)
@@ -102,6 +102,9 @@ func _button(text: String, big := false) -> Button:
 			"pressed":
 				sb.bg_color = ORANGE.darkened(0.2)
 		b.add_theme_stylebox_override(st, sb)
+	b.focus_entered.connect(func(): Audio.play("ui_move", 0.5))
+	b.mouse_entered.connect(func(): Audio.play("ui_move", 0.4))
+	b.pressed.connect(func(): Audio.play("ui_click", 0.6))
 	b.add_theme_color_override("font_color", WHITE)
 	b.add_theme_color_override("font_focus_color", WHITE)
 	b.add_theme_color_override("font_hover_color", WHITE)
@@ -185,7 +188,7 @@ func _build_settings() -> void:
 	sb.set_corner_radius_all(14)
 	sb.set_content_margin_all(26)
 	settings_panel.add_theme_stylebox_override("panel", sb)
-	settings_panel.position = Vector2(64, 200)
+	settings_panel.position = Vector2(64, 120)
 	settings_panel.visible = false
 	menu.add_child(settings_panel)
 	var v := VBoxContainer.new()
@@ -209,12 +212,38 @@ func _build_settings() -> void:
 	sl.value_changed.connect(Settings.set_trip_strength)
 	v.add_child(sl)
 	var fs := CheckButton.new()
-	fs.text = "Fullscreen"
+	fs.text = "Full screen (F11 / Alt+Enter / View button)"
 	fs.button_pressed = Settings.fullscreen
 	fs.add_theme_font_override("font", font)
 	fs.add_theme_font_size_override("font_size", 18)
 	fs.toggled.connect(Settings.set_fullscreen)
+	Settings.changed.connect(func(): fs.set_pressed_no_signal(Settings.fullscreen))
 	v.add_child(fs)
+	v.add_child(_label("Music volume", 18, WHITE, 0))
+	var mv := HSlider.new()
+	mv.min_value = 0.0
+	mv.max_value = 1.0
+	mv.step = 0.05
+	mv.value = Settings.music_volume
+	mv.custom_minimum_size = Vector2(280, 24)
+	v.add_child(mv)
+	v.add_child(_label("Effects volume", 18, WHITE, 0))
+	var sv := HSlider.new()
+	sv.min_value = 0.0
+	sv.max_value = 1.0
+	sv.step = 0.05
+	sv.value = Settings.sfx_volume
+	sv.custom_minimum_size = Vector2(280, 24)
+	v.add_child(sv)
+	mv.value_changed.connect(func(x): Settings.set_volume(x, sv.value))
+	sv.value_changed.connect(func(x): Settings.set_volume(mv.value, x); Audio.play("ui_click", 0.6))
+	var rb := CheckButton.new()
+	rb.text = "Controller rumble"
+	rb.button_pressed = Settings.rumble
+	rb.add_theme_font_override("font", font)
+	rb.add_theme_font_size_override("font_size", 18)
+	rb.toggled.connect(Settings.set_rumble)
+	v.add_child(rb)
 	var back := _button("BACK")
 	back.pressed.connect(func(): _show_settings(false))
 	v.add_child(back)

@@ -65,6 +65,8 @@ func _ready() -> void:
 	rider.crashed.connect(_on_crashed)
 	blinkers.crossed.connect(_on_blinker)
 	score.trick_banked.connect(ui.bank_trick)
+	score.trick_banked.connect(func(_n, _p, q): Audio.play("trick_clean" if q == "clean" else "trick_sketchy", 0.7))
+	trip.phase_changed.connect(func(p): if p != "Sober" and flow == Flow.RIDING: Audio.play("phase", 0.6))
 	ui.start_pressed.connect(start_run)
 	ui.ride_again_pressed.connect(ride_again)
 	ui.menu_pressed.connect(to_summit_menu)
@@ -96,12 +98,15 @@ func _reset_world() -> void:
 	blinkers.reset()
 	flow = Flow.SUMMIT
 	_crash_timer = -1.0
+	Audio.set_muffled(false)
 
 
 func start_run() -> void:
 	if flow != Flow.SUMMIT:
 		return
 	ui.hide_menu()
+	Audio.play("start", 0.6)
+	Audio.set_muffled(false)
 	flow = Flow.INTRO
 	rider.begin_intro()
 	cam.begin_transition()
@@ -114,6 +119,7 @@ func ride_again() -> void:
 		return
 	_restarting = true
 	_set_paused(false)
+	Audio.play("wipe", 0.6)
 	ui.powder_wipe(func():
 		_reset_world()
 		ui.hide_menu()
@@ -134,6 +140,7 @@ func to_summit_menu() -> void:
 
 func _set_paused(on: bool) -> void:
 	paused = on
+	Audio.set_muffled(on)
 	get_tree().paused = on
 	ui.show_pause(on)
 
@@ -206,6 +213,8 @@ func _on_blinker(index: int, bonus: int) -> void:
 	score.on_blinker(index, bonus)
 	trip.on_blinker(index)
 	ui.bank_blinker("BLINKER %d" % index, bonus, trip.phase)
+	Audio.play("blinker", 0.8)
+	Audio.rumble(0.4, 0.2, 0.25)
 	print("[game] blinker %d crossed at z=%.1f" % [index, rider.global_position.z])
 
 
@@ -213,6 +222,7 @@ func _on_crashed(reason: String) -> void:
 	flow = Flow.WIPEOUT
 	_crash_reason = reason
 	_crash_timer = wipeout_card_delay
+	Audio.set_muffled(true)
 	cam.shake(0.9)
 	ui.clear_trick()
 	print("[game] wipeout: %s at %.0f m, score %d" % [reason, score.distance, score.total()])

@@ -153,6 +153,7 @@ func _process(dt: float) -> void:
 		RenderingServer.global_shader_parameter_set("rider_pos", rider.global_position)
 		RenderingServer.global_shader_parameter_set("travel_dir", rider.cam_heading)
 	_update_post(dt, I * s, reduced)
+	Audio.set_trip(I * strength * Settings.trip_strength, reduced)
 	_update_phase()
 	_update_encounters(dt)
 
