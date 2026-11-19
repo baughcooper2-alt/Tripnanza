@@ -47,7 +47,10 @@ enum State { SEATED, INTRO, RIDING, AIR, CRASHED }
 @export var stick_distance := 0.35
 @export_group("Tricks")
 @export var flip_speed_deg := 430.0          ## frontflip/backflip rotation speed
-@export var spin_speed_deg := 560.0          ## spin rotation speed
+@export var spin_speed_deg := 380.0          ## top spin speed in the air (lower = gentler)
+@export var spin_accel_deg := 1100.0         ## how quickly a spin winds up
+@export var spin_deadzone := 0.35            ## light stick/steer in the air doesn't start a spin
+@export var spin_stop_deg := 1400.0          ## how quickly a spin settles once you let go
 @export var rotation_accel_deg := 2600.0
 @export var untuck_decay_deg := 900.0        ## how fast rotation slows once you untuck
 @export var land_assist_deg := 45.0          ## near-upright landings get nudged straight
@@ -552,10 +555,13 @@ func _air(dt: float) -> void:
 		flip_vel = move_toward(flip_vel, pitch_in * deg_to_rad(flip_speed_deg), acc)
 	else:
 		flip_vel = move_toward(flip_vel, 0.0, dec)
-	if absf(spin_in) > 0.1:
-		spin_vel = move_toward(spin_vel, -spin_in * deg_to_rad(spin_speed_deg), acc)
+	# Spins: gentle wind-up, a deadzone so small corrections don't spin you,
+	# and speed that grows with how far you push.
+	var sm := clampf((absf(spin_in) - spin_deadzone) / (1.0 - spin_deadzone), 0.0, 1.0)
+	if sm > 0.0:
+		spin_vel = move_toward(spin_vel, -signf(spin_in) * sm * sm * deg_to_rad(spin_speed_deg), deg_to_rad(spin_accel_deg) * dt)
 	else:
-		spin_vel = move_toward(spin_vel, 0.0, dec)
+		spin_vel = move_toward(spin_vel, 0.0, deg_to_rad(spin_stop_deg) * dt)
 	flip += flip_vel * dt
 	spin += spin_vel * dt
 	var assist := deg_to_rad(land_assist_deg)
