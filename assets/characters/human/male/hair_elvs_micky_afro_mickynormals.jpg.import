@@ -3,35 +3,43 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://lo81bb3d132j"
-path="res://.godot/imported/hair_elvs_micky_afro_mickynormals.jpg-afc3d6c726d2ad2960b5bfc63ec12a9e.ctex"
+path.s3tc="res://.godot/imported/hair_elvs_micky_afro_mickynormals.jpg-afc3d6c726d2ad2960b5bfc63ec12a9e.s3tc.ctex"
+path.etc2="res://.godot/imported/hair_elvs_micky_afro_mickynormals.jpg-afc3d6c726d2ad2960b5bfc63ec12a9e.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 generator_parameters={
-"md5": "a4241ceb159f7f5277e854bd43496730"
+"md5": "a3d44231ca8cbc3112836eb8b0580734"
 }
 
 [deps]
 
 source_file="res://assets/characters/human/male/hair_elvs_micky_afro_mickynormals.jpg"
-dest_files=["res://.godot/imported/hair_elvs_micky_afro_mickynormals.jpg-afc3d6c726d2ad2960b5bfc63ec12a9e.ctex"]
+dest_files=["res://.godot/imported/hair_elvs_micky_afro_mickynormals.jpg-afc3d6c726d2ad2960b5bfc63ec12a9e.s3tc.ctex", "res://.godot/imported/hair_elvs_micky_afro_mickynormals.jpg-afc3d6c726d2ad2960b5bfc63ec12a9e.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
+compress/uastc_level=0
+compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=1
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1
-roughness/mode=0
-roughness/src_normal=""
+roughness/mode=1
+roughness/src_normal="res://assets/characters/human/male/hair_elvs_micky_afro_mickynormals.jpg"
+process/channel_remap/red=0
+process/channel_remap/green=1
+process/channel_remap/blue=2
+process/channel_remap/alpha=3
 process/fix_alpha_border=true
 process/premult_alpha=false
 process/normal_map_invert_y=false
 process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
-detect_3d/compress_to=1
+detect_3d/compress_to=0
