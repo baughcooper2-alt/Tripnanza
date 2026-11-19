@@ -8,6 +8,8 @@ signal ride_again_pressed
 signal menu_pressed
 signal resume_pressed
 
+## Shown bottom-right on the summit menu so you can tell which version is running.
+const BUILD := "0.4 · realistic + your snowboarder"
 const WHITE := Color(1, 1, 1)
 const INK := Color(0.08, 0.1, 0.2)
 const ORANGE := Color(1.0, 0.42, 0.12)
@@ -151,6 +153,16 @@ func _build_menu() -> void:
 	col.add_child(_spacer(10))
 	best_label = _label("", 20, WHITE, 4)
 	col.add_child(best_label)
+	var build := _label("Build " + BUILD, 14, Color(1, 1, 1, 0.7), 3)
+	build.anchor_left = 1.0
+	build.anchor_right = 1.0
+	build.anchor_top = 1.0
+	build.anchor_bottom = 1.0
+	build.offset_left = -360
+	build.offset_right = -20
+	build.offset_top = -34
+	build.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	menu.add_child(build)
 	var help := _label("Controller (Steep layout): left stick steer / flip / spin · RT jump · RT/LT grab · right stick brake / tuck · LB camera · hold Y restart\nKeyboard: A/D carve · Space jump · W/S flip (air) or tuck/brake (snow) · J/K grab · Q switch · C camera · F photo · hold R restart · X bail", 14, Color(1, 1, 1, 0.85), 4)
 	help.anchor_top = 1.0
 	help.anchor_bottom = 1.0
