@@ -29,7 +29,7 @@ func _ready() -> void:
 	if capture_dir != "":
 		DirAccess.make_dir_recursive_absolute(capture_dir)
 	rider.landed.connect(func(r): _ev(("x=%.1f vel=%s " % [rider.position.x, rider.vel]) + "landed %s quality=%s pts=%d tilt=%.0f spin_err=%.0f impact=%.1f air=%.2fs" % [r.name, r.quality, r.points, r.tilt, r.spin_err, r.impact, r.air]))
-	rider.took_off.connect(func(): _ev("takeoff x=%.1f z=%.1f vel=%s" % [rider.position.x, rider.position.z, rider.vel]))
+	rider.took_off.connect(func(): _ev("takeoff x=%.1f z=%.1f vel=%s fwd=%s lean=%.2f ramp=%s" % [rider.position.x, rider.position.z, rider.vel, rider.fwd, rider.lean, rider.from_ramp]))
 	rider.crashed.connect(func(reason): _ev("CRASH " + reason))
 	main.blinkers.crossed.connect(func(i, b): _ev("BLINKER %d +%d" % [i, b]); _shot_once("blinker_%d" % i, 0.25))
 	main.trip.phase_changed.connect(func(p): _ev("phase -> " + p))
@@ -77,6 +77,8 @@ func _process(dt: float) -> void:
 				_shot_once("summit_menu")
 			if t > 3.0:
 				get_tree().quit()
+	if rider.state == Rider.State.AIR and phase != "air" and not (scenario == "long_run" and _ai.back):
+		_ai.steer = 0.0
 	_log_t += dt
 	if _log_t > 2.0 and rider.is_controllable():
 		_log_t = 0.0
@@ -119,13 +121,13 @@ func _first_minute() -> void:
 			if rider.state == Rider.State.RIDING:
 				_set_phase("to_ramp")
 		"to_ramp":
-			_steer_to(Vector2(0.0, 130.0))
+			_steer_to(Vector2(0.0, 72.0) if rider.position.z < 58.0 else Vector2(0.0, 140.0), 4.0)
 			# Carve a little on the way so the screenshot shows an edge.
-			if rider.position.z > 16 and rider.position.z < 25:
-				_ai.steer = 0.7
-				_shot_once("05_carving", 0.4)
-			elif rider.position.z >= 25 and rider.position.z < 33:
-				_ai.steer = -0.7
+			if rider.position.z > 12 and rider.position.z < 18:
+				_ai.steer = 0.75
+				_shot_once("05_carving", 0.25)
+			elif rider.position.z >= 18 and rider.position.z < 24:
+				_ai.steer = -0.75
 			_ai.jump = rider.position.z > 66.0
 			if rider.position.z > 72.9 and rider.state == Rider.State.RIDING:
 				_ai.jump = false
@@ -155,6 +157,8 @@ func _first_minute() -> void:
 				_ai.steer = 0.0
 			if _phase_t > 2.5:
 				_shot_once("09_after_blinker")
+			if Settings.args.has("stop_after_blinker") and _phase_t > 3.5:
+				_finish()
 			if _phase_t > 6.0:
 				_set_phase("find_tree")
 		"find_tree":

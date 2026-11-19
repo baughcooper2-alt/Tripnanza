@@ -25,6 +25,8 @@ func _ready() -> void:
 		args[kv[0]] = kv[1] if kv.size() > 1 else "1"
 	_register_inputs()
 	load_settings()
+	if args.has("reduced"):
+		reduced_effects = true
 	_apply_window()
 
 

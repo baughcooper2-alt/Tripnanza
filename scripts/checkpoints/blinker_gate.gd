@@ -27,7 +27,7 @@ func build() -> void:
 	_mat.shader = preload("res://shaders/gate.gdshader")
 	_mat.set_shader_parameter("segments", 9.0 + style * 2.0)
 	_mat.set_shader_parameter("rainbow", clampf(style * 0.35, 0.0, 1.0))
-	_mat.set_shader_parameter("base_color", Vector3(0.35, 0.95, 1.0))
+	_mat.set_shader_parameter("base_color", Color(0.35, 0.95, 1.0))
 	_frame = MeshInstance3D.new()
 	_frame.mesh = _frame_mesh()
 	_frame.material_override = _mat

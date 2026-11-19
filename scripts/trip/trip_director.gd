@@ -57,6 +57,11 @@ func reset() -> void:
 	phase = "Sober"
 	phase_changed.emit(phase)
 	_gap = 10.0
+	if Settings.args.has("encounter_gap"):
+		# Test hook: bring encounters closer together.
+		_gap = 2.0
+		var g := float(Settings.args["encounter_gap"])
+		encounter_gap = Vector2(g, g)
 	_enc_index = 0
 	if encounters:
 		encounters.clear_all()

@@ -87,6 +87,9 @@ var _vis_q := Quaternion.IDENTITY
 var _jump_was := false
 var _last_trick := ""
 var _ground_y := 0.0
+var _spin_locked := false
+var _pitch_locked := false
+var _popped := false
 
 
 func _ready() -> void:
@@ -307,6 +310,7 @@ func _ride(dt: float) -> void:
 		charge = 0.0
 		position.y = maxf(position.y, gr.w)
 		vel += nn * pop
+		_popped = true
 		_take_off(false)
 		pop_t = 0.3
 		return
@@ -370,6 +374,13 @@ func _take_off(from_lip: bool) -> void:
 	var hv := Vector3(vel.x, 0, vel.z)
 	air_head = fwd if hv.length() < 1.0 else fwd
 	_last_trick = ""
+	# Unplanned air (rolling off a lip or roller without popping): inputs that
+	# were already held for carving or tucking don't start a spin or flip until
+	# they are released and pressed again. A deliberate pop allows pre-winding.
+	var i := _inp()
+	_spin_locked = not _popped and absf(i.steer) > 0.1
+	_pitch_locked = not _popped and (i.forward or i.back)
+	_popped = false
 	took_off.emit()
 
 
@@ -385,6 +396,8 @@ func _air(dt: float) -> void:
 		vel.y += lip_pop_bonus + charge * ollie_charge_bonus * 0.5
 		pop_t = 0.3
 		charge = 0.0
+		_spin_locked = false
+		_pitch_locked = false
 	_jump_was = jump
 	vel.y -= gravity * dt
 	position += vel * dt
@@ -394,6 +407,14 @@ func _air(dt: float) -> void:
 	# Rotation: hold to tuck and rotate, release to untuck and slow down.
 	var pitch_in := (1.0 if i.back else 0.0) - (1.0 if i.forward else 0.0)
 	var spin_in: float = i.steer
+	if _spin_locked:
+		if absf(spin_in) < 0.1:
+			_spin_locked = false
+		spin_in = 0.0
+	if _pitch_locked:
+		if absf(pitch_in) < 0.1:
+			_pitch_locked = false
+		pitch_in = 0.0
 	var acc := deg_to_rad(rotation_accel_deg) * dt
 	var dec := deg_to_rad(untuck_decay_deg) * dt
 	if absf(pitch_in) > 0.1:

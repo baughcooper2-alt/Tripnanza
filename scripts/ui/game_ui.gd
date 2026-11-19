@@ -386,7 +386,7 @@ func bank_trick(name: String, points: int, quality: String) -> void:
 	tw2.set_parallel(true)
 	tw2.tween_property(trick_label, "modulate:a", 0.0, 0.35)
 	tw2.tween_property(bank_label, "modulate:a", 0.0, 0.45)
-	tw2.tween_property(bank_label, "position:y", BANK_Y - 90.0, 0.45).set_ease(Tween.EASE_IN)
+	tw2.tween_property(bank_label, "position:y", BANK_Y - 24.0, 0.45).set_ease(Tween.EASE_IN)
 
 
 ## Blinker: rainbow sweep across the progress bar and a slide-in tag beneath.

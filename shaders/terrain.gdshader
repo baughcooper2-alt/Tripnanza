@@ -38,6 +38,7 @@ void fragment() {
 	vec3 emi = vec3(0.0);
 	float near_keep = smoothstep(7.0, 26.0, d_rider);    // 0 near rider -> 1 far
 	float far_only = smoothstep(35.0, 90.0, d_rider);
+	float mid_field = smoothstep(14.0, 60.0, d_rider);
 
 	// --- Onset: snow grain flowing against the direction of travel.
 	vec2 flow = wpos.xz * 2.2 + travel_dir.xz * trip_time * 1.6;
@@ -75,7 +76,7 @@ void fragment() {
 
 	// --- Liquid marbling + Julia-set paisley in the far field and edges.
 	float edge = smoothstep(0.3, 0.75, abs(SCREEN_UV.x - 0.5) * 2.0) + smoothstep(0.35, 0.0, SCREEN_UV.y);
-	float mask = clamp(max(far_only, edge * near_keep), 0.0, 1.0) * trip_marble;
+	float mask = clamp(max(mid_field * 0.85, edge * near_keep), 0.0, 1.0) * trip_marble;
 	if (mask > 0.01) {
 		vec2 q = wpos.xz * 0.012;
 		vec2 w = vec2(fbm(q + trip_time * 0.03), fbm(q + 7.3 - trip_time * 0.025));
@@ -86,8 +87,8 @@ void fragment() {
 		jp = vec2(jp.x * cos(trip_time * 0.03) - jp.y * sin(trip_time * 0.03), jp.x * sin(trip_time * 0.03) + jp.y * cos(trip_time * 0.03));
 		vec3 jul = julia_bands(jp, trip_time);
 		vec3 trip_col = mix(marble, jul, smoothstep(0.55, 0.9, trip_intensity) * far_only);
-		alb = mix(alb, trip_col * 0.6 + 0.25, mask * 0.75);
-		emi += trip_col * mask * 0.35;
+		alb = mix(alb, trip_col * 0.85, mask * 0.8);
+		emi += trip_col * mask * 0.12;
 	}
 
 	// --- Waves: landed flips (wave_*) and blinker crossings (gate_wave_*).

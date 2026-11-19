@@ -118,5 +118,6 @@ excluded from exports.
 
 ## Music
 
-There's no audio yet. Add an `AudioStreamPlayer` under `Main`, give it your
-track, and enable Autoplay.
+Select the **Music** node in `scenes/main.tscn` and drag your track (.ogg/.mp3/
+.wav) into its **Stream** slot. It already autoplays, and it keeps playing while paused.
+For a loop, enable *Loop* in the file's Import settings.

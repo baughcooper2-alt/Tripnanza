@@ -1,7 +1,7 @@
 // Blinker gate frame. UV.x = position along the frame from base (0) to crown
 // (1). Segments light up from the snow toward the crown as `lit` rises.
 shader_type spatial;
-render_mode unshaded, cull_disabled, shadows_disabled, blend_add, depth_draw_never;
+render_mode unshaded, cull_disabled, shadows_disabled, blend_mix, depth_draw_never;
 
 #include "res://shaders/trip_common.gdshaderinc"
 
@@ -18,5 +18,6 @@ void fragment() {
 	float gap = smoothstep(0.0, 0.12, fract(UV.x * segments)) * smoothstep(1.0, 0.88, fract(UV.x * segments));
 	vec3 c = mix(base_color, hue_rgb(seg * 0.6 + trip_time * 0.2), rainbow);
 	float glow = mix(0.12, 1.0, on) * (0.85 + 0.15 * sin(trip_time * 3.0 - seg * 6.0)) + pulse;
-	ALBEDO = c * glow * gap * fade * 1.4;
+	ALBEDO = c * (0.8 + 0.9 * glow);
+	ALPHA = clamp(glow * gap * fade, 0.0, 1.0);
 }

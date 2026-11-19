@@ -28,6 +28,7 @@ var flow := Flow.SUMMIT
 var paused := false
 var _crash_reason := ""
 var _crash_timer := -1.0
+var _restarting := false
 
 
 func _ready() -> void:
@@ -98,18 +99,26 @@ func start_run() -> void:
 
 
 func ride_again() -> void:
+	if _restarting:
+		return
+	_restarting = true
 	_set_paused(false)
 	ui.powder_wipe(func():
 		_reset_world()
 		ui.hide_menu()
-		start_run())
+		start_run()
+		_restarting = false)
 
 
 func to_summit_menu() -> void:
+	if _restarting:
+		return
+	_restarting = true
 	_set_paused(false)
 	ui.powder_wipe(func():
 		_reset_world()
-		ui.show_menu())
+		ui.show_menu()
+		_restarting = false)
 
 
 func _set_paused(on: bool) -> void:

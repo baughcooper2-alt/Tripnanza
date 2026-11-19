@@ -1,7 +1,7 @@
 // Decorative hallucinations: glowing, translucent, liquid rainbow, no shading,
 // no shadows, no rim. Deliberately the opposite of the solid-hazard look.
 shader_type spatial;
-render_mode unshaded, cull_disabled, blend_add, depth_draw_never, shadows_disabled, fog_disabled;
+render_mode unshaded, cull_disabled, blend_mix, depth_draw_never, shadows_disabled, fog_disabled;
 
 #include "res://shaders/trip_common.gdshaderinc"
 
@@ -40,5 +40,6 @@ void fragment() {
 	} else {
 		col = hue_rgb(UV.x + trip_time * 0.3 + hue_offset);
 	}
-	ALBEDO = col * alpha * keep * grow;
+	ALBEDO = col;
+	ALPHA = clamp(alpha * keep * grow, 0.0, 1.0);
 }
