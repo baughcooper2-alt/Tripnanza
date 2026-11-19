@@ -97,6 +97,16 @@ effects rise and fall while the total keeps climbing. Phases:
 * **Peak**: liquid marbling and Julia-set spirals in the far snow, sky mandala,
   edge kaleidoscope, melting drips and radial echo, scaling with speed.
 
+On top of that, the screen compositor (`scripts/trip/trip_compositor.gd` +
+`shaders/trip_post.gdshader`) adds effects modelled on the reference images:
+tracers (frame feedback), false-colour palettes that change at every BLINKER
+(Dusk Smear → Infrared → Cyan Forest → Paint By Number → Net Of Being),
+paint-by-number posterizing with ink lines and unpainted patches, colour grain
+in the shadows, and a radial zoom smear. Eyes open in the distant snow and
+follow you. `scripts/trip/apparitions.gd` spawns "random things" well off your
+line (giant glowing mushrooms, a watching eye, a ghost of the rider, fractal
+flowers, halo rings), and they dissolve before you reach them.
+
 Readability rules: nothing distorts near the rider or the line just ahead.
 Solid hazards stay matte and opaque with a darkening rim. Hallucinations are
 glowing, translucent, unshaded and never collide. The **Reduced trip effects**

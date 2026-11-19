@@ -119,6 +119,10 @@ gate_line_z={
 "type": "float",
 "value": 150.0
 }
+trip_eyes={
+"type": "float",
+"value": 0.0
+}
 gate_line_glow={
 "type": "float",
 "value": 0.0

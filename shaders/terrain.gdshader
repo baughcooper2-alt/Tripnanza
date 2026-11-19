@@ -91,6 +91,38 @@ void fragment() {
 		emi += trip_col * mask * 0.12;
 	}
 
+	// --- Eyes open in the far snow and follow you (Net of Being reference).
+	if (trip_eyes > 0.01 && d_rider > 22.0) {
+		float cs = 13.0;
+		vec2 cell = floor(wpos.xz / cs);
+		float h = hash12(cell + 17.0);
+		if (h > 0.5) {
+			vec2 center = (cell + 0.5 + (vec2(hash12(cell + 3.1), hash12(cell + 7.7)) - 0.5) * 0.4) * cs;
+			vec2 ay = normalize(travel_dir.xz + vec2(1e-4));
+			vec2 ax = vec2(-ay.y, ay.x);
+			float size = 5.0 + h * 3.5;
+			vec2 q = wpos.xz - center;
+			vec2 e = vec2(dot(q, ax), dot(q, ay) * 0.55) / size;
+			// Lids open slowly and close slowly; never a blink-flash.
+			float open = clamp(sin(trip_time * 0.35 + h * 40.0) * 1.6 + 0.4, 0.0, 1.0) * trip_eyes;
+			float lid = open * 0.5 * (1.0 - e.x * e.x);
+			float inside = step(abs(e.x), 1.0) * smoothstep(0.0, 0.04, lid - abs(e.y));
+			float rim = step(abs(e.x), 1.05) * (1.0 - smoothstep(0.0, 0.12, abs(abs(e.y) - lid))) * step(0.02, open);
+			vec2 look = rider_pos.xz - center;
+			vec2 gaze = vec2(dot(look, ax), dot(look, ay) * 0.55);
+			vec2 ic = normalize(gaze + vec2(1e-4)) * 0.28;
+			float di = length((e - ic) * vec2(1.0, 1.4));
+			vec3 iris = hue_rgb(di * 3.0 - trip_time * 0.2 + h + trip_hue);
+			vec3 eye_col = vec3(0.97, 0.94, 0.9);
+			eye_col = mix(eye_col, iris, smoothstep(0.34, 0.3, di));
+			eye_col = mix(eye_col, vec3(0.03), smoothstep(0.13, 0.1, di));
+			float fade = smoothstep(22.0, 45.0, d_rider);
+			alb = mix(alb, eye_col, inside * fade);
+			emi += eye_col * inside * fade * 0.45;
+			alb = mix(alb, vec3(0.2, 0.02, 0.06), rim * fade);
+		}
+	}
+
 	// --- Waves: landed flips (wave_*) and blinker crossings (gate_wave_*).
 	float wt = trip_time - wave_time;
 	if (wt > 0.0 && wt < 4.0) {

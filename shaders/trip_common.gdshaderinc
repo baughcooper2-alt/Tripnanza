@@ -12,6 +12,7 @@ global uniform float trip_warp;
 global uniform float trip_split;
 global uniform float trip_sky;
 global uniform float trip_hue;
+global uniform float trip_eyes;
 global uniform vec3 rider_pos;
 global uniform vec3 travel_dir;
 global uniform vec3 wave_origin;

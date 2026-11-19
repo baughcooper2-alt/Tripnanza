@@ -119,6 +119,8 @@ func _apply(dt: float) -> void:
 		xf.origin += Vector3(randf_range(-1, 1), randf_range(-1, 1), randf_range(-1, 1)) * _shake * 0.15
 		_shake = maxf(_shake - dt * 2.0, 0.0)
 	global_transform = xf
+	if camera.get_parent() != self:
+		camera.global_transform = xf   # camera lives in the compositor's WorldView
 	camera.fov = lerpf(menu_fov, game_fov, b)
 
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://b7tripnanzamain"]
+[gd_scene load_steps=22 format=3 uid="uid://b7tripnanzamain"]
 
 [ext_resource type="Script" path="res://scripts/core/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/world/terrain_streamer.gd" id="2_terrain"]
@@ -14,6 +14,8 @@
 [ext_resource type="Script" path="res://scripts/fx/tracks.gd" id="12_tracks"]
 [ext_resource type="Shader" path="res://shaders/sky.gdshader" id="13_sky"]
 [ext_resource type="Shader" path="res://shaders/trip_post.gdshader" id="14_post"]
+[ext_resource type="Script" path="res://scripts/trip/trip_compositor.gd" id="15_comp"]
+[ext_resource type="Script" path="res://scripts/trip/apparitions.gd" id="16_app"]
 
 [sub_resource type="ShaderMaterial" id="SkyMat"]
 shader = ExtResource("13_sky")
@@ -104,6 +106,12 @@ intensity_over_time = SubResource("TripCurve")
 
 [node name="Encounters" type="Node3D" parent="."]
 script = ExtResource("7_enc")
+
+[node name="Apparitions" type="Node3D" parent="."]
+script = ExtResource("16_app")
+
+[node name="Compositor" type="Node" parent="."]
+script = ExtResource("15_comp")
 
 [node name="Blinkers" type="Node3D" parent="."]
 script = ExtResource("8_blink")

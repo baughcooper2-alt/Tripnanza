@@ -23,6 +23,8 @@ enum Flow { SUMMIT, INTRO, RIDING, WIPEOUT }
 @onready var sun: DirectionalLight3D = $Sun
 @onready var powder: Powder = $Powder
 @onready var tracks: Tracks = $Tracks
+@onready var compositor: TripCompositor = $Compositor
+@onready var apparitions: Apparitions = $Apparitions
 
 var flow := Flow.SUMMIT
 var paused := false
@@ -37,7 +39,7 @@ func _ready() -> void:
 	var az := deg_to_rad(sun_azimuth_deg)
 	var to_sun := Vector3(cos(el) * sin(az), sin(el), cos(el) * cos(az))
 	sun.basis = Basis.looking_at(-to_sun, Vector3.UP)
-	for n in [rider, cam, terrain, trip, encounters, blinkers, powder, tracks, backdrop]:
+	for n in [rider, cam, terrain, trip, encounters, blinkers, powder, tracks, backdrop, apparitions]:
 		n.process_mode = Node.PROCESS_MODE_PAUSABLE
 	rider.powder = powder
 	rider.tracks = tracks
@@ -47,6 +49,10 @@ func _ready() -> void:
 	trip.camera_rig = cam
 	trip.encounters = encounters
 	trip.post = post_rect.material
+	compositor.setup(cam.camera, post_rect.material)
+	trip.compositor = compositor
+	apparitions.rider = rider
+	apparitions.trip = trip
 	blinkers.rider = rider
 	blinkers.tracks = tracks
 	rider.control_started.connect(_on_control)
@@ -74,6 +80,7 @@ func _ready() -> void:
 func _reset_world() -> void:
 	Mountain.reset_world()
 	encounters.clear_all()
+	apparitions.clear_all()
 	powder.clear()
 	tracks.clear()
 	rider.reset_to_summit()
