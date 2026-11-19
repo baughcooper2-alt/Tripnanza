@@ -1,0 +1,20 @@
+# Godot 4 caches and imports
+.godot/
+# Exports and binaries
+/build/
+/export/
+*.exe
+*.pck
+*.dmg
+*.zip
+*.app/
+*.x86_64
+# Editor / OS noise
+*.tmp
+.DS_Store
+Thumbs.db
+.mono/
+data_*/
+mono_crash.*.json
+# Capture output from the test harness
+/captures/

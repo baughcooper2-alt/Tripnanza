@@ -1,0 +1,128 @@
+[gd_scene load_steps=20 format=3 uid="uid://b7tripnanzamain"]
+
+[ext_resource type="Script" path="res://scripts/core/main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/world/terrain_streamer.gd" id="2_terrain"]
+[ext_resource type="Script" path="res://scripts/world/backdrop.gd" id="3_backdrop"]
+[ext_resource type="Script" path="res://scripts/rider/rider.gd" id="4_rider"]
+[ext_resource type="Script" path="res://scripts/camera/camera_rig.gd" id="5_cam"]
+[ext_resource type="Script" path="res://scripts/trip/trip_director.gd" id="6_trip"]
+[ext_resource type="Script" path="res://scripts/trip/encounters.gd" id="7_enc"]
+[ext_resource type="Script" path="res://scripts/checkpoints/blinker_manager.gd" id="8_blink"]
+[ext_resource type="Script" path="res://scripts/core/score_keeper.gd" id="9_score"]
+[ext_resource type="Script" path="res://scripts/ui/game_ui.gd" id="10_ui"]
+[ext_resource type="Script" path="res://scripts/fx/powder.gd" id="11_powder"]
+[ext_resource type="Script" path="res://scripts/fx/tracks.gd" id="12_tracks"]
+[ext_resource type="Shader" path="res://shaders/sky.gdshader" id="13_sky"]
+[ext_resource type="Shader" path="res://shaders/trip_post.gdshader" id="14_post"]
+
+[sub_resource type="ShaderMaterial" id="SkyMat"]
+shader = ExtResource("13_sky")
+
+[sub_resource type="Sky" id="Sky"]
+sky_material = SubResource("SkyMat")
+
+[sub_resource type="Environment" id="Env"]
+background_mode = 2
+sky = SubResource("Sky")
+ambient_light_source = 3
+ambient_light_color = Color(0.6, 0.7, 0.95, 1)
+ambient_light_sky_contribution = 0.55
+ambient_light_energy = 0.42
+tonemap_mode = 2
+tonemap_exposure = 0.95
+tonemap_white = 1.6
+glow_enabled = true
+glow_intensity = 0.6
+glow_bloom = 0.05
+glow_hdr_threshold = 1.1
+fog_enabled = true
+fog_light_color = Color(0.82, 0.86, 0.97, 1)
+fog_density = 0.0013
+fog_sky_affect = 0.0
+fog_aerial_perspective = 0.35
+adjustment_enabled = true
+adjustment_saturation = 1.08
+
+[sub_resource type="Curve" id="TripCurve"]
+_data = [Vector2(0, 0), 0.0, 0.6, 0, 0, Vector2(0.08, 0.06), 0.9, 0.9, 0, 0, Vector2(0.25, 0.3), 1.4, 1.4, 0, 0, Vector2(0.5, 0.56), 1.0, 1.0, 0, 0, Vector2(0.78, 0.82), 0.9, 0.9, 0, 0, Vector2(1, 1), 0.5, 0.0, 0, 0]
+point_count = 6
+
+[sub_resource type="ShaderMaterial" id="PostMat"]
+shader = ExtResource("14_post")
+shader_parameter/focus = Vector2(0.5, 0.55)
+shader_parameter/window = Vector2(0.36, 0.42)
+shader_parameter/kaleido = 0.0
+shader_parameter/echo = 0.0
+shader_parameter/melt = 0.0
+shader_parameter/aberration = 0.0
+shader_parameter/speed01 = 0.0
+shader_parameter/reduced = 0.0
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1_main")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+light_color = Color(1, 0.86, 0.68, 1)
+light_energy = 1.45
+shadow_enabled = true
+shadow_bias = 0.04
+shadow_normal_bias = 1.2
+directional_shadow_mode = 2
+directional_shadow_split_1 = 0.08
+directional_shadow_split_2 = 0.25
+directional_shadow_max_distance = 220.0
+
+[node name="Terrain" type="Node3D" parent="."]
+script = ExtResource("2_terrain")
+
+[node name="Backdrop" type="Node3D" parent="."]
+script = ExtResource("3_backdrop")
+
+[node name="Tracks" type="Node3D" parent="."]
+script = ExtResource("12_tracks")
+
+[node name="Rider" type="Node3D" parent="."]
+script = ExtResource("4_rider")
+
+[node name="Powder" type="MultiMeshInstance3D" parent="."]
+script = ExtResource("11_powder")
+
+[node name="CameraRig" type="Node3D" parent="."]
+script = ExtResource("5_cam")
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig"]
+current = true
+fov = 58.0
+far = 6500.0
+
+[node name="TripDirector" type="Node" parent="."]
+script = ExtResource("6_trip")
+intensity_over_time = SubResource("TripCurve")
+
+[node name="Encounters" type="Node3D" parent="."]
+script = ExtResource("7_enc")
+
+[node name="Blinkers" type="Node3D" parent="."]
+script = ExtResource("8_blink")
+
+[node name="Score" type="Node" parent="."]
+script = ExtResource("9_score")
+
+[node name="PostFX" type="CanvasLayer" parent="."]
+layer = 1
+
+[node name="Trip" type="ColorRect" parent="PostFX"]
+material = SubResource("PostMat")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="UI" type="CanvasLayer" parent="."]
+layer = 10
+script = ExtResource("10_ui")

@@ -1,0 +1,123 @@
+; Engine configuration file.
+; Tripnanza - an endless low-poly snowboarding run with a mushroom trip.
+
+config_version=5
+
+[application]
+
+config/name="Tripnanza"
+config/description="Endless low-poly snowboarding with a slowly unfolding mushroom trip."
+run/main_scene="res://scenes/main.tscn"
+config/features=PackedStringArray("4.3", "Forward Plus")
+config/icon="res://icon.svg"
+
+[autoload]
+
+Settings="*res://scripts/core/settings.gd"
+Mountain="*res://scripts/world/mountain.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[physics]
+
+common/physics_ticks_per_second=60
+
+[rendering]
+
+renderer/rendering_method="forward_plus"
+anti_aliasing/quality/msaa_3d=1
+lights_and_shadows/directional_shadow/size=4096
+lights_and_shadows/directional_shadow/soft_shadow_filter_quality=2
+environment/defaults/default_clear_color=Color(0.55, 0.68, 0.86, 1)
+
+[shader_globals]
+
+trip_intensity={
+"type": "float",
+"value": 0.0
+}
+trip_time={
+"type": "float",
+"value": 0.0
+}
+trip_grain={
+"type": "float",
+"value": 0.0
+}
+trip_breathe={
+"type": "float",
+"value": 0.0
+}
+trip_echo={
+"type": "float",
+"value": 0.0
+}
+trip_contour={
+"type": "float",
+"value": 0.0
+}
+trip_ribbons={
+"type": "float",
+"value": 0.0
+}
+trip_fold={
+"type": "float",
+"value": 0.0
+}
+trip_marble={
+"type": "float",
+"value": 0.0
+}
+trip_warp={
+"type": "float",
+"value": 0.0
+}
+trip_split={
+"type": "float",
+"value": 0.0
+}
+trip_sky={
+"type": "float",
+"value": 0.0
+}
+trip_hue={
+"type": "float",
+"value": 0.0
+}
+rider_pos={
+"type": "vec3",
+"value": Vector3(0, 0, 0)
+}
+travel_dir={
+"type": "vec3",
+"value": Vector3(0, 0, 1)
+}
+wave_origin={
+"type": "vec3",
+"value": Vector3(0, -10000, 0)
+}
+wave_time={
+"type": "float",
+"value": -100.0
+}
+gate_wave_origin={
+"type": "vec3",
+"value": Vector3(0, -10000, 0)
+}
+gate_wave_time={
+"type": "float",
+"value": -100.0
+}
+gate_line_z={
+"type": "float",
+"value": 150.0
+}
+gate_line_glow={
+"type": "float",
+"value": 0.0
+}
