@@ -9,7 +9,7 @@ signal menu_pressed
 signal resume_pressed
 
 ## Shown bottom-right on the summit menu so you can tell which version is running.
-const BUILD := "0.5.1 · gentler air spins"
+const BUILD := "0.6 · physics upgrade, flips need big air"
 const WHITE := Color(1, 1, 1)
 const INK := Color(0.08, 0.1, 0.2)
 const ORANGE := Color(1.0, 0.42, 0.12)

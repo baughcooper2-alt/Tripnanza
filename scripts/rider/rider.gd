@@ -43,7 +43,7 @@ enum State { SEATED, INTRO, RIDING, AIR, CRASHED }
 @export var charge_time := 0.5
 @export var lip_pop_window := 0.18           ## releasing jump this soon after a lip adds pop
 @export var lip_pop_bonus := 2.4
-@export var leave_ground_speed := 2.8
+@export var leave_ground_speed := 2.8          ## grows with speed so the board hugs small bumps
 @export var stick_distance := 0.35
 @export_group("Tricks")
 @export var flip_speed_deg := 430.0          ## frontflip/backflip rotation speed
@@ -54,15 +54,20 @@ enum State { SEATED, INTRO, RIDING, AIR, CRASHED }
 @export var rotation_accel_deg := 2600.0
 @export var untuck_decay_deg := 900.0        ## how fast rotation slows once you untuck
 @export var land_assist_deg := 45.0          ## near-upright landings get nudged straight
+@export var min_flip_height := 2.5           ## a flip can only start this high above the snow...
+@export var min_flip_airtime := 0.75         ## ...or with at least this much hang time left
+@export var spot_time := 0.4                 ## final seconds before touchdown where the rider spots the landing
+@export var spot_flip_deg := 75.0            ## how far off upright the spot can still save
+@export var spot_spin_deg := 55.0
 @export var clean_tilt_deg := 35.0
 @export var clean_spin_deg := 30.0
-@export var sketchy_tilt_deg := 80.0
-@export var sketchy_spin_deg := 68.0
-@export var max_impact_speed := 32.0
+@export var sketchy_tilt_deg := 100.0
+@export var sketchy_spin_deg := 80.0
+@export var max_impact_speed := 42.0
 @export_group("Collisions")
 @export var body_radius := 0.38
 @export var safe_bump_speed := 3.5
-@export var crash_into_speed := 11.0   ## only hits faster than this straight into a tree/rock end the run
+@export var crash_into_speed := 16.0   ## only hits faster than this straight into a tree/rock end the run
 @export var bump_speed_loss := 0.45
 
 var state := State.SEATED
@@ -430,7 +435,7 @@ func _ride(dt: float) -> void:
 		_take_off(false)
 		pop_t = 0.3
 		return
-	if above > stick_distance or vn > leave_ground_speed:
+	if above > stick_distance + spd * 0.01 or vn > leave_ground_speed + spd * 0.06:
 		_take_off(on_ramp_before)
 		return
 	position.y = gr.w
@@ -551,8 +556,15 @@ func _air(dt: float) -> void:
 		pitch_in = 0.0
 	var acc := deg_to_rad(rotation_accel_deg) * dt
 	var dec := deg_to_rad(untuck_decay_deg) * dt
-	if absf(pitch_in) > 0.1:
-		flip_vel = move_toward(flip_vel, pitch_in * deg_to_rad(flip_speed_deg), acc)
+	# How high are we and how much hang time is left (ballistic estimate)?
+	var height := position.y - gr.w
+	var t_left := (vel.y + sqrt(maxf(vel.y * vel.y + 2.0 * gravity * maxf(height, 0.0), 0.0))) / gravity
+	# Flips only start with real air under you; an already-started flip carries on.
+	var can_flip := height > min_flip_height or t_left > min_flip_airtime or absf(flip_vel) > 1.0
+	if absf(pitch_in) > 0.1 and can_flip:
+		# Holding the flip pulls into a tighter tuck: rotation speeds up as it builds.
+		var tuck_boost := 1.0 + 0.25 * clampf(absf(flip) / TAU, 0.0, 1.0)
+		flip_vel = move_toward(flip_vel, pitch_in * deg_to_rad(flip_speed_deg) * tuck_boost, acc)
 	else:
 		flip_vel = move_toward(flip_vel, 0.0, dec)
 	# Spins: gentle wind-up, a deadzone so small corrections don't spin you,
@@ -573,6 +585,18 @@ func _air(dt: float) -> void:
 		var r := wrapf(spin, -PI * 0.5, PI * 0.5)
 		if absf(r) < assist * 0.7:
 			spin -= r * minf(1.0, 3.5 * dt)
+	# Spotting the landing: in the last moments before touchdown, with no
+	# rotation input, the rider straightens toward a landable angle.
+	if t_left < spot_time and vel.y < 0.0:
+		var k := minf(1.0, 7.0 * dt)
+		var rf := wrapf(flip, -PI, PI)
+		if absf(pitch_in) < 0.1 and absf(rf) < deg_to_rad(spot_flip_deg):
+			flip -= rf * k
+			flip_vel *= 1.0 - k
+		var rs := wrapf(spin, -PI * 0.5, PI * 0.5)
+		if absf(spin_in) < spin_deadzone and absf(rs) < deg_to_rad(spot_spin_deg):
+			spin -= rs * k
+			spin_vel *= 1.0 - k
 	# Neutral attitude eases toward the slope below so a plain air lands flat.
 	air_up = air_up.slerp(gn, 1.0 - exp(-2.2 * dt)).normalized()
 	var hv := Vector3(vel.x, 0, vel.z)
@@ -630,7 +654,9 @@ func _land(n: Vector3) -> void:
 			switch_stance = not switch_stance
 	# The landed visual must not jump: rebuild the smoothed quaternion target.
 	normal = n
-	vel = vp * (1.0 - clampf((impact - 6.0) / 40.0, 0.0, 0.3))
+	# Matching the slope keeps your speed; landing flat bleeds it.
+	var match_slope := clampf(vp.length() / maxf(vel.length(), 0.01), 0.0, 1.0)
+	vel = vp * lerpf(0.82, 1.0, match_slope) * (1.0 - clampf((impact - 8.0) / 50.0, 0.0, 0.25))
 	if quality == "sketchy":
 		vel *= 0.75
 		sketchy_t = 0.8
